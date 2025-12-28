@@ -1,0 +1,55 @@
+<div class="login-container">
+    <div class="logo-area">
+        <h1>Barber App</h1>
+        <p>Bienvenido</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn" [class.active]="mode === 'client'" (click)="toggleMode()">Soy Cliente</button>
+        <button class="tab-btn" [class.active]="mode === 'admin'" (click)="toggleMode()">Administrador</button>
+    </div>
+
+    <div class="card">
+
+        <!-- CLIENT FORM -->
+        <div *ngIf="mode === 'client'" class="form-section">
+            <h2>Ingresa tus datos</h2>
+
+            <div class="form-group">
+                <label class="form-label">Número de Celular</label>
+                <input type="tel" [(ngModel)]="clientPhone" class="form-input" placeholder="300 123 4567">
+            </div>
+
+            <div class="form-group" *ngIf="showNameInput">
+                <label class="form-label">Tu Nombre Completo</label>
+                <input type="text" [(ngModel)]="clientName" class="form-input" placeholder="Juan Perez">
+            </div>
+
+            <p class="error-msg" *ngIf="error">{{ error }}</p>
+
+            <app-button [fullWidth]="true" label="Ingresar" (click)="onClientSubmit()" [disabled]="loading">
+            </app-button>
+        </div>
+
+        <!-- ADMIN FORM -->
+        <div *ngIf="mode === 'admin'" class="form-section">
+            <h2>Acceso Administrativo</h2>
+
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" [(ngModel)]="adminEmail" class="form-input" placeholder="admin@barber.com">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Contraseña</label>
+                <input type="password" [(ngModel)]="adminPass" class="form-input" placeholder="••••••••">
+            </div>
+
+            <p class="error-msg" *ngIf="error">{{ error }}</p>
+
+            <app-button [fullWidth]="true" label="Entrar" (click)="onAdminSubmit()" [disabled]="loading"></app-button>
+        </div>
+
+    </div>
+</div>

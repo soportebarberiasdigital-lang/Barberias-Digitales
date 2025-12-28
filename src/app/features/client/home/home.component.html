@@ -1,0 +1,23 @@
+<div class="home-container">
+    <header class="header">
+        <h1>Servicios Disponibles</h1>
+        <p>Elige tu estilo</p>
+    </header>
+
+    <div class="services-grid" *ngIf="!loading; else loader">
+        <div class="service-card" *ngFor="let service of services">
+            <div class="service-info">
+                <h3>{{ service.nombre }}</h3>
+                <span class="price">\${{ service.precio | number }}</span>
+            </div>
+            <p class="duration">{{ service.duracion_min }} min</p>
+            <app-button variant="outline" label="Reservar" (click)="bookService(service.id)"></app-button>
+        </div>
+    </div>
+
+    <ng-template #loader>
+        <div class="loader-container">
+            <p>Cargando servicios...</p>
+        </div>
+    </ng-template>
+</div>

@@ -1,0 +1,31 @@
+<div class="appointments-container">
+    <div class="header">
+        <h1>Mis Citas</h1>
+    </div>
+
+    <div class="appointments-list" *ngIf="!loading; else loader">
+        <div class="appointment-card" *ngFor="let app of appointments" [class.cancelada]="app.estado === 'cancelada'">
+            <div class="app-header">
+                <span class="status" [class]="app.estado">{{ app.estado }}</span>
+                <span class="date">{{ app.fecha }} - {{ app.hora }}</span>
+            </div>
+
+            <div class="app-details">
+                <h3>{{ app.services?.nombre }}</h3>
+                <p>Barbero: {{ app.barbers?.nombre }}</p>
+            </div>
+
+            <div class="actions" *ngIf="app.estado !== 'cancelada' && app.estado !== 'completada'">
+                <app-button variant="outline" label="Cancelar" (click)="cancelAppointment(app.id!)"></app-button>
+            </div>
+        </div>
+
+        <div class="empty-state" *ngIf="appointments.length === 0">
+            <p>No tienes citas programadas.</p>
+        </div>
+    </div>
+
+    <ng-template #loader>
+        <div class="loader">Cargando citas...</div>
+    </ng-template>
+</div>

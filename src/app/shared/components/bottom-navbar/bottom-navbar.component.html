@@ -1,0 +1,33 @@
+<nav class="bottom-nav" *ngIf="isAdmin || isClient">
+    <!-- Client Menu -->
+    <ng-container *ngIf="isClient">
+        <a routerLink="/home" class="nav-item" [class.active]="isActive('/home')">
+            <span class="material-icons">home</span>
+            <span class="label">Inicio</span>
+        </a>
+        <a routerLink="/booking" class="nav-item" [class.active]="isActive('/booking')">
+            <span class="material-icons">add_circle_outline</span>
+            <span class="label">Agendar</span>
+        </a>
+        <a routerLink="/appointments" class="nav-item" [class.active]="isActive('/appointments')">
+            <span class="material-icons">calendar_today</span>
+            <span class="label">Mis Citas</span>
+        </a>
+    </ng-container>
+
+    <!-- Admin Menu -->
+    <ng-container *ngIf="isAdmin">
+        <a routerLink="/admin/dashboard" class="nav-item" [class.active]="isActive('/admin/dashboard')">
+            <span class="material-icons">dashboard</span>
+            <span class="label">Tablero</span>
+        </a>
+        <a routerLink="/admin/agenda" class="nav-item" [class.active]="isActive('/admin/agenda')">
+            <span class="material-icons">view_agenda</span>
+            <span class="label">Agenda</span>
+        </a>
+        <a routerLink="/admin/reports" class="nav-item" [class.active]="isActive('/admin/reports')">
+            <span class="material-icons">bar_chart</span>
+            <span class="label">Reportes</span>
+        </a>
+    </ng-container>
+</nav>

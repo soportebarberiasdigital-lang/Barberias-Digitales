@@ -1,0 +1,11 @@
+<button 
+  [type]="type"
+  class="btn"
+  [class.btn-primary]="variant === 'primary'"
+  [class.btn-outline]="variant === 'outline'"
+  [class.btn-full]="fullWidth"
+  [disabled]="disabled">
+  <span *ngIf="icon" class="material-icons" style="margin-right: 8px;">{{icon}}</span>
+  {{ label }}
+  <ng-content></ng-content>
+</button>

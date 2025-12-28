@@ -1,0 +1,73 @@
+<div class="booking-container">
+
+    <!-- Step 1: Select Barber -->
+    <div *ngIf="step === 1">
+        <div class="header">
+            <h2>Elige un Barbero</h2>
+        </div>
+        <div class="barbers-grid">
+            <div class="barber-card" *ngFor="let barber of barbers" (click)="selectBarber(barber)"
+                [class.selected]="selectedBarber?.id === barber.id">
+                <div class="avatar-placeholder">
+                    {{ barber.nombre.charAt(0) }}
+                </div>
+                <span class="barber-name">{{ barber.nombre }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Date & Time -->
+    <div *ngIf="step === 2">
+        <div class="header">
+            <button class="back-btn" (click)="step = 1"><span class="material-icons">arrow_back</span></button>
+            <h2>Fecha y Hora</h2>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Fecha</label>
+            <input type="date" class="form-input" (change)="onDateChange($event)" [min]="'2024-01-01'">
+        </div>
+
+        <div class="slots-area" *ngIf="selectedDate">
+            <p *ngIf="loadingSlots">Cargando horas...</p>
+            <div class="slots-grid" *ngIf="!loadingSlots">
+                <button *ngFor="let slot of availableSlots" class="slot-btn" [class.active]="selectedTime === slot"
+                    (click)="selectTime(slot)">
+                    {{ slot }}
+                </button>
+            </div>
+        </div>
+
+        <div class="action-bar" *ngIf="selectedTime">
+            <app-button [fullWidth]="true" label="Continuar" (click)="goToConfirmation()"></app-button>
+        </div>
+    </div>
+
+    <!-- Step 3: Confirmation -->
+    <div *ngIf="step === 3">
+        <div class="header">
+            <button class="back-btn" (click)="step = 2"><span class="material-icons">arrow_back</span></button>
+            <h2>Confirmar Cita</h2>
+        </div>
+
+        <div class="confirmation-card">
+            <div class="summary-item">
+                <span class="label">Barbero:</span>
+                <span class="value">{{ selectedBarber?.nombre }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Fecha:</span>
+                <span class="value">{{ selectedDate }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Hora:</span>
+                <span class="value">{{ selectedTime }}</span>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <app-button [fullWidth]="true" label="Confirmar Reserva" (click)="confirmBooking()"></app-button>
+        </div>
+    </div>
+
+</div>

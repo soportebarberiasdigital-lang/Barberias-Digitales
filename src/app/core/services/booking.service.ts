@@ -34,6 +34,7 @@ export interface Appointment {
     estado: 'pendiente' | 'confirmada' | 'cancelada' | 'completada';
     services?: Service; // joined
     barbers?: Barber;   // joined
+    clientes?: Client;  // joined
 }
 
 export interface BarberSchedule {
@@ -163,6 +164,53 @@ export class BookingService {
         const promise = this.supabaseService.client
             .from('appointments')
             .update({ estado: 'cancelada' })
+            .eq('id', appointmentId);
+
+        return from(promise);
+    }
+
+    // --- Admin Methods ---
+    getAllTodayAppointments(): Observable<Appointment[]> {
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        return this.getAllAppointmentsByDate(today);
+    }
+
+    getAllAppointmentsByDate(fecha: string): Observable<Appointment[]> {
+        const promise = this.supabaseService.client
+            .from('appointments')
+            .select(`
+        *,
+        services (nombre, precio, duracion_min),
+        barbers (nombre),
+        clientes (nombre, telefono)
+      `)
+            .eq('fecha', fecha)
+            .order('hora', { ascending: true });
+
+        return from(promise).pipe(map(res => res.data as Appointment[] || []));
+    }
+
+    getAppointmentsByDateRange(fechaInicio: string, fechaFin: string): Observable<Appointment[]> {
+        const promise = this.supabaseService.client
+            .from('appointments')
+            .select(`
+        *,
+        services (nombre, precio, duracion_min),
+        barbers (nombre),
+        clientes (nombre, telefono)
+      `)
+            .gte('fecha', fechaInicio)
+            .lte('fecha', fechaFin)
+            .order('fecha', { ascending: false })
+            .order('hora', { ascending: false });
+
+        return from(promise).pipe(map(res => res.data as Appointment[] || []));
+    }
+
+    updateAppointmentStatus(appointmentId: string, estado: 'pendiente' | 'confirmada' | 'cancelada' | 'completada'): Observable<any> {
+        const promise = this.supabaseService.client
+            .from('appointments')
+            .update({ estado })
             .eq('id', appointmentId);
 
         return from(promise);

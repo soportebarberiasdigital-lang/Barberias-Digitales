@@ -11,13 +11,12 @@
                 <span class="price">${{ service.precio | number }}</span>
             </div>
             <p class="duration">{{ service.duracion_min }} min</p>
-            <app-button variant="outline" label="Reservar" (click)="bookService(service.id)"></app-button>
+            <app-button variant="outline" label="Reservar"
+                (click)="bookService(service.id,service.precio)"></app-button>
         </div>
     </div>
 
     <ng-template #loader>
-        <div class="loader-container">
-            <p>Cargando servicios...</p>
-        </div>
+        <app-loading-spinner message="Cargando servicios..." size="medium"></app-loading-spinner>
     </ng-template>
 </div>

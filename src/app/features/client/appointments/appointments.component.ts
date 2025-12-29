@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { BookingService, Appointment } from '../../../core/services/booking.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ButtonComponent } from '../../../shared/components/ui/button/button.component';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-appointments',
   standalone: true,
-  imports: [CommonModule, ButtonComponent],
+  imports: [CommonModule, ButtonComponent, LoadingSpinnerComponent],
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.scss']
 })

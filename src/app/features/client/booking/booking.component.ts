@@ -5,12 +5,13 @@ import { FormsModule } from '@angular/forms';
 import { BookingService, Barber, Service, Appointment } from '../../../core/services/booking.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ButtonComponent } from '../../../shared/components/ui/button/button.component';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-booking',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent],
+  imports: [CommonModule, FormsModule, ButtonComponent, LoadingSpinnerComponent],
   templateUrl: './booking.component.html',
   styleUrls: ['./booking.component.scss']
 })
@@ -20,6 +21,7 @@ export class BookingComponent implements OnInit {
   barbers: Barber[] = [];
   selectedBarber: Barber | null = null;
   selectedServiceId: string | null = null;
+  selectedServicePrecio: number = 0;
 
   selectedDate: string = '';
   selectedTime: string = '';
@@ -40,6 +42,7 @@ export class BookingComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.selectedServiceId = params['serviceId'];
+      this.selectedServicePrecio = params['precio'];
     });
 
     this.bookingService.getActiveBarbers().subscribe(barbers => {
@@ -129,7 +132,7 @@ export class BookingComponent implements OnInit {
       barber_id: this.selectedBarber.id,
       fecha: this.selectedDate,
       hora: this.selectedTime,
-      precio: 0, // Should look up service price
+      precio: this.selectedServicePrecio,
       estado: 'pendiente'
     };
 

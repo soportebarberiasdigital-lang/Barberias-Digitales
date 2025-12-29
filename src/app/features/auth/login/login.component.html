@@ -59,4 +59,8 @@
         </div>
 
     </div>
+
+    <!-- Loading Overlay -->
+    <app-loading-spinner *ngIf="loading" [overlay]="true"
+        [message]="mode === 'client' ? 'Verificando datos...' : 'Iniciando sesión...'"></app-loading-spinner>
 </div>

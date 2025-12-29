@@ -29,7 +29,8 @@
         </div>
 
         <div class="slots-area" *ngIf="selectedDate">
-            <p *ngIf="loadingSlots">Cargando horas...</p>
+            <app-loading-spinner *ngIf="loadingSlots" message="Cargando horas disponibles..."
+                size="small"></app-loading-spinner>
             <div class="slots-grid" *ngIf="!loadingSlots">
                 <button *ngFor="let slot of availableSlots" class="slot-btn" [class.active]="selectedTime === slot"
                     (click)="selectTime(slot)">

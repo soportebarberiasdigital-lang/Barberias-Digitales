@@ -18,12 +18,13 @@
 
             <div class="form-group">
                 <label class="form-label">Número de Celular</label>
-                <input type="tel" [(ngModel)]="clientPhone" class="form-input" placeholder="300 123 4567">
+                <input type="tel" [(ngModel)]="clientPhone" class="form-input"
+                    placeholder="Ingresa tu número de Celular">
             </div>
 
             <div class="form-group" *ngIf="showNameInput">
                 <label class="form-label">Tu Nombre Completo</label>
-                <input type="text" [(ngModel)]="clientName" class="form-input" placeholder="Juan Perez">
+                <input type="text" [(ngModel)]="clientName" class="form-input" placeholder="Ingresa tu nombre">
             </div>
 
             <p class="error-msg" *ngIf="error">{{ error }}</p>
@@ -43,7 +44,13 @@
 
             <div class="form-group">
                 <label class="form-label">Contraseña</label>
-                <input type="password" [(ngModel)]="adminPass" class="form-input" placeholder="••••••••">
+                <div class="password-input-wrapper">
+                    <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="adminPass" class="form-input"
+                        placeholder="••••••••">
+                    <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
+                        <span class="material-icons">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+                    </button>
+                </div>
             </div>
 
             <p class="error-msg" *ngIf="error">{{ error }}</p>

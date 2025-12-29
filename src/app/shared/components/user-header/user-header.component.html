@@ -1,0 +1,14 @@
+<div class="user-header" *ngIf="currentUser">
+    <div class="user-info">
+        <div class="avatar">
+            {{ currentUser.name.charAt(0).toUpperCase() }}
+        </div>
+        <div class="user-details">
+            <span class="user-name">{{ currentUser.name }}</span>
+            <span class="user-role">{{ currentUser.role === 'admin' ? 'Administrador' : 'Cliente' }}</span>
+        </div>
+    </div>
+    <button class="logout-btn" (click)="logout()" title="Cerrar sesión">
+        <span class="material-icons">logout</span>
+    </button>
+</div>

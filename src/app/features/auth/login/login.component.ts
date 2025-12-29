@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ButtonComponent } from '../../../shared/components/ui/button/button.component';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -23,11 +24,12 @@ export class LoginComponent {
   // Admin Data
   adminEmail: string = '';
   adminPass: string = '';
+  showPassword = false;
 
   loading = false;
   error: string | null = null;
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(private authService: AuthService, private router: Router, private toastService: ToastService) { }
 
   toggleMode() {
     this.mode = this.mode === 'client' ? 'admin' : 'client';
@@ -35,13 +37,17 @@ export class LoginComponent {
     this.showNameInput = false;
   }
 
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
   async onClientSubmit() {
     if (!this.clientPhone) {
-      this.error = 'Ingresa tu celular';
+      this.toastService.warning('Ingresa tu celular');
       return;
     }
     if (this.showNameInput && !this.clientName) {
-      this.error = 'Ingresa tu nombre';
+      this.toastService.warning('Ingresa tu nombre');
       return;
     }
 
@@ -53,11 +59,12 @@ export class LoginComponent {
 
     if (error === 'USER_NOT_FOUND_NEED_NAME') {
       this.showNameInput = true;
-      this.error = 'Parece que eres nuevo, por favor dinos tu nombre.';
+      this.toastService.info('Parece que eres nuevo, por favor dinos tu nombre.');
     } else if (error) {
-      this.error = error || 'Error en el ingreso';
+      this.toastService.error(error || 'Error en el ingreso');
     } else {
-      this.router.navigate(['/home']);
+      this.toastService.success('¡Bienvenido!');
+      setTimeout(() => this.router.navigate(['/home']), 500);
     }
   }
 
@@ -71,9 +78,10 @@ export class LoginComponent {
     this.loading = false;
 
     if (error) {
-      this.error = error;
+      this.toastService.error(error);
     } else {
-      this.router.navigate(['/admin/dashboard']);
+      this.toastService.success('¡Bienvenido, Administrador!');
+      setTimeout(() => this.router.navigate(['/admin/dashboard']), 500);
     }
   }
 }

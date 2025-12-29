@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { BookingService, Barber, Service, Appointment } from '../../../core/services/booking.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ButtonComponent } from '../../../shared/components/ui/button/button.component';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-booking',
@@ -32,7 +33,8 @@ export class BookingComponent implements OnInit {
     private bookingService: BookingService,
     private authService: AuthService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -63,17 +65,49 @@ export class BookingComponent implements OnInit {
     if (!this.selectedBarber || !this.selectedDate) return;
     this.loadingSlots = true;
 
-    // Simplification: Static slots for now, normally generated based on open hours (e.g. 9-18)
-    // Then filter out existing appointments.
-    const allSlots = this.generateTimeSlots('09:00', '18:00', 30); // 30 min slots
+    const selectedDateObj = new Date(this.selectedDate + 'T00:00:00');
+    const diaSemana = selectedDateObj.getDay() === 0 ? 7 : selectedDateObj.getDay(); // 1=Lunes, 7=Domingo
 
-    this.bookingService.getAppointmentsForBarber(this.selectedBarber.id, this.selectedDate)
-      .subscribe(appointments => {
-        const bookedTimes = appointments.map(a => a.hora.substring(0, 5));
-        // Also check blocked_times table if we had implementing that service method
-        this.availableSlots = allSlots.filter(t => !bookedTimes.includes(t));
-        this.loadingSlots = false;
-      });
+    // Fetch all required data in parallel
+    Promise.all([
+      this.bookingService.getBarberSchedule(this.selectedBarber.id, diaSemana).toPromise(),
+      this.bookingService.getBlockedTimes(this.selectedBarber.id, this.selectedDate).toPromise(),
+      this.bookingService.getAppointmentsForBarber(this.selectedBarber.id, this.selectedDate).toPromise(),
+      this.bookingService.getBarberiaConfig().toPromise()
+    ]).then(([schedule, blockedTimes, appointments, config]) => {
+
+      // Determine working hours
+      let startTime = '09:00';
+      let endTime = '18:00';
+
+      if (schedule) {
+        startTime = schedule.hora_inicio.substring(0, 5);
+        endTime = schedule.hora_fin.substring(0, 5);
+      } else if (config) {
+        // Fallback to barberia general hours if no specific schedule
+        startTime = config.horario_apertura.substring(0, 5);
+        endTime = config.horario_cierre.substring(0, 5);
+      }
+
+      // Generate all possible slots
+      const allSlots = this.generateTimeSlots(startTime, endTime, 30);
+
+      // Filter out booked appointments
+      const bookedTimes = (appointments || []).map(a => a.hora.substring(0, 5));
+
+      // Filter out blocked times
+      const blockedSlots = (blockedTimes || []).map(bt => bt.hora?.substring(0, 5)).filter(Boolean);
+
+      // Combine exclusions
+      const unavailableSlots = [...bookedTimes, ...blockedSlots];
+
+      this.availableSlots = allSlots.filter(slot => !unavailableSlots.includes(slot));
+      this.loadingSlots = false;
+    }).catch(error => {
+      console.error('Error loading slots:', error);
+      this.loadingSlots = false;
+      this.availableSlots = [];
+    });
   }
 
   selectTime(time: string) {
@@ -89,9 +123,6 @@ export class BookingComponent implements OnInit {
   confirmBooking() {
     if (!this.userInfo || !this.selectedServiceId || !this.selectedBarber || !this.selectedDate || !this.selectedTime) return;
 
-    // We assume the price comes from the service, but here we just need to pass it or look it up.
-    // Ideally we fetch the service details again or pass them fully.
-    // For now assuming a default or fetched in a real scenario.
     const appointment: Appointment = {
       cliente_id: this.userInfo.id,
       service_id: this.selectedServiceId,
@@ -102,8 +133,15 @@ export class BookingComponent implements OnInit {
       estado: 'pendiente'
     };
 
-    this.bookingService.createAppointment(appointment).subscribe(() => {
-      this.router.navigate(['/appointments']);
+    this.bookingService.createAppointment(appointment).subscribe({
+      next: () => {
+        this.toastService.success('Tu cita ha sido agendada correctamente', '¡Reserva confirmada!');
+        setTimeout(() => this.router.navigate(['/appointments']), 1000);
+      },
+      error: (err) => {
+        this.toastService.error('No se pudo crear la cita. Intenta de nuevo.', 'Error');
+        console.error(err);
+      }
     });
   }
 

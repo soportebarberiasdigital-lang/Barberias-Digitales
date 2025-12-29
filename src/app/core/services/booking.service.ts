@@ -13,7 +13,7 @@ export interface Service {
     id: string;
     nombre: string;
     precio: number;
-    duracion_min: number; // Changed from duracion
+    duracion_min: number;
     activo: boolean;
 }
 
@@ -31,9 +31,36 @@ export interface Appointment {
     fecha: string; // date
     hora: string; // time
     precio: number;
-    estado: 'pendiente' | 'confirmada' | 'cancelada' | 'completada'; // Changed status values
+    estado: 'pendiente' | 'confirmada' | 'cancelada' | 'completada';
     services?: Service; // joined
     barbers?: Barber;   // joined
+}
+
+export interface BarberSchedule {
+    id: string;
+    barber_id: string;
+    dia_semana: number; // 1=Lunes, 7=Domingo
+    hora_inicio: string; // time
+    hora_fin: string; // time
+}
+
+export interface BlockedTime {
+    id: string;
+    barber_id: string;
+    fecha: string; // date
+    hora: string; // time
+    motivo?: string;
+}
+
+export interface BarberiaConfig {
+    id: string;
+    nombre: string;
+    telefono?: string;
+    direccion?: string;
+    horario_apertura: string; // time
+    horario_cierre: string; // time
+    moneda: string;
+    logo_url?: string;
 }
 
 @Injectable({
@@ -61,6 +88,40 @@ export class BookingService {
             .eq('activo', true);
 
         return from(promise).pipe(map(res => res.data as Service[] || []));
+    }
+
+    // --- Barber Schedules ---
+    getBarberSchedule(barberId: string, diaSemana: number): Observable<BarberSchedule | null> {
+        const promise = this.supabaseService.client
+            .from('barber_schedules')
+            .select('*')
+            .eq('barber_id', barberId)
+            .eq('dia_semana', diaSemana)
+            .single();
+
+        return from(promise).pipe(map(res => res.data as BarberSchedule || null));
+    }
+
+    // --- Blocked Times ---
+    getBlockedTimes(barberId: string, fecha: string): Observable<BlockedTime[]> {
+        const promise = this.supabaseService.client
+            .from('blocked_times')
+            .select('*')
+            .eq('barber_id', barberId)
+            .eq('fecha', fecha);
+
+        return from(promise).pipe(map(res => res.data as BlockedTime[] || []));
+    }
+
+    // --- Barberia Config ---
+    getBarberiaConfig(): Observable<BarberiaConfig | null> {
+        const promise = this.supabaseService.client
+            .from('barberia_config')
+            .select('*')
+            .limit(1)
+            .single();
+
+        return from(promise).pipe(map(res => res.data as BarberiaConfig || null));
     }
 
     // --- Appointments ---

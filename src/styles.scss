@@ -1,11 +1,15 @@
 /* Global Variables & Mobile First Design System */
 :root {
   /* Colors - Premium Palette */
-  --primary-color: #D4AF37; /* Gold */
+  --primary-color: #D4AF37;
+  /* Gold */
   --primary-dark: #AA8C2C;
-  --secondary-color: #1A1A1A; /* Dark Grey/Black */
-  --background-color: #0F0F0F; /* Almost Black */
-  --surface-color: #242424; /* Card Background */
+  --secondary-color: #1A1A1A;
+  /* Dark Grey/Black */
+  --background-color: #0F0F0F;
+  /* Almost Black */
+  --surface-color: #242424;
+  /* Card Background */
   --text-color: #FFFFFF;
   --text-muted: #B0B0B0;
   --error-color: #CF6679;
@@ -17,14 +21,14 @@
   --font-size-lg: 1.125rem;
   --font-size-xl: 1.5rem;
   --font-size-2xl: 2rem;
-  
+
   /* Spacing */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
-  
+
   /* Radius */
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -36,13 +40,16 @@
 }
 
 /* Reset */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   font-family: var(--font-family);
   background-color: var(--background-color);
@@ -71,7 +78,8 @@ ul {
 /* Utilities */
 .container {
   width: 100%;
-  max-width: 600px; /* Setup for Mobile First but limiting readability width on Desktop */
+  max-width: 600px;
+  /* Setup for Mobile First but limiting readability width on Desktop */
   margin: 0 auto;
   padding: 0 var(--spacing-md);
 }
@@ -130,7 +138,8 @@ ul {
   font-weight: 600;
   border-radius: var(--radius-md);
   transition: all 0.2s ease;
-  min-height: var(--touch-target-size); /* Accessibility */
+  min-height: var(--touch-target-size);
+  /* Accessibility */
 }
 
 .btn-primary {
@@ -174,6 +183,8 @@ ul {
   color: var(--text-color);
   font-size: 1rem;
   transition: border-color 0.2s;
+  outline: none;
+  border-color: #444444;
 }
 
 .form-input:focus {

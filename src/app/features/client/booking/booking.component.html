@@ -1,74 +1,373 @@
-<div class="booking-container">
+<div class="booking-flow-page">
 
-    <!-- Step 1: Select Barber -->
-    <div *ngIf="step === 1">
-        <div class="header">
-            <h2>Elige un Barbero</h2>
-        </div>
-        <div class="barbers-grid">
-            <div class="barber-card" *ngFor="let barber of barbers" (click)="selectBarber(barber)"
-                [class.selected]="selectedBarber?.id === barber.id">
-                <div class="avatar-placeholder">
-                    {{ barber.nombre.charAt(0) }}
-                </div>
-                <span class="barber-name">{{ barber.nombre }}</span>
-            </div>
-        </div>
+  <!-- TOP PROGRESS STEPPER -->
+  <div class="stepper-bar">
+    <div class="step-item" [class.active]="step === 1" [class.completed]="step > 1" (click)="step > 1 ? step = 1 : null">
+      <div class="step-circle">
+        <span *ngIf="step > 1" class="material-icons check-icon">check</span>
+        <span *ngIf="step <= 1">1</span>
+      </div>
+      <span class="step-label">Servicio</span>
     </div>
 
-    <!-- Step 2: Date & Time -->
-    <div *ngIf="step === 2">
-        <div class="header">
-            <button class="back-btn" (click)="step = 1"><span class="material-icons">arrow_back</span></button>
-            <h2>Fecha y Hora</h2>
-        </div>
+    <div class="step-line" [class.filled]="step > 1"></div>
 
-        <div class="form-group">
-            <label class="form-label">Fecha</label>
-            <input type="date" class="form-input" (change)="onDateChange($event)" [min]="'2024-01-01'">
-        </div>
-
-        <div class="slots-area" *ngIf="selectedDate">
-            <app-loading-spinner *ngIf="loadingSlots" message="Cargando horas disponibles..."
-                size="small"></app-loading-spinner>
-            <div class="slots-grid" *ngIf="!loadingSlots">
-                <button *ngFor="let slot of availableSlots" class="slot-btn" [class.active]="selectedTime === slot"
-                    (click)="selectTime(slot)">
-                    {{ slot }}
-                </button>
-            </div>
-        </div>
-
-        <div class="action-bar" *ngIf="selectedTime">
-            <app-button [fullWidth]="true" label="Continuar" (click)="goToConfirmation()"></app-button>
-        </div>
+    <div class="step-item" [class.active]="step === 2" [class.completed]="step > 2" (click)="step > 2 ? step = 2 : null">
+      <div class="step-circle">
+        <span *ngIf="step > 2" class="material-icons check-icon">check</span>
+        <span *ngIf="step <= 2">2</span>
+      </div>
+      <span class="step-label">Barbero</span>
     </div>
 
-    <!-- Step 3: Confirmation -->
-    <div *ngIf="step === 3">
-        <div class="header">
-            <button class="back-btn" (click)="step = 2"><span class="material-icons">arrow_back</span></button>
-            <h2>Confirmar Cita</h2>
-        </div>
+    <div class="step-line" [class.filled]="step > 2"></div>
 
-        <div class="confirmation-card">
-            <div class="summary-item">
-                <span class="label">Barbero:</span>
-                <span class="value">{{ selectedBarber?.nombre }}</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Fecha:</span>
-                <span class="value">{{ selectedDate }}</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Hora:</span>
-                <span class="value">{{ selectedTime }}</span>
-            </div>
-        </div>
-
-        <div class="action-bar">
-            <app-button [fullWidth]="true" label="Confirmar Reserva" (click)="confirmBooking()"></app-button>
-        </div>
+    <div class="step-item" [class.active]="step === 3" [class.completed]="step > 3" (click)="step > 3 ? step = 3 : null">
+      <div class="step-circle">
+        <span *ngIf="step > 3" class="material-icons check-icon">check</span>
+        <span *ngIf="step <= 3">3</span>
+      </div>
+      <span class="step-label">Horario</span>
     </div>
+
+    <div class="step-line" [class.filled]="step > 3"></div>
+
+    <div class="step-item" [class.active]="step === 4">
+      <div class="step-circle">
+        <span>4</span>
+      </div>
+      <span class="step-label">Resumen</span>
+    </div>
+  </div>
+
+  <!-- STEP 1: SELECT SERVICE -->
+  <div *ngIf="step === 1" class="step-section">
+    <div class="section-heading">
+      <span class="eyebrow">PASO 1 DE 4</span>
+      <h1 class="main-title">Selecciona un Servicio</h1>
+      <p class="sub-title">Elige el tratamiento o corte que deseas agendar hoy.</p>
+    </div>
+
+    <div class="services-stack" *ngIf="!loadingServices; else loader">
+      <div 
+        *ngFor="let s of services" 
+        class="service-luxury-card" 
+        [class.selected]="selectedService?.id === s.id"
+        (click)="selectService(s)">
+        
+        <div class="service-left">
+          <div class="service-icon-box">
+            <span class="material-icons">{{ getServiceIcon(s.nombre) }}</span>
+          </div>
+          <div class="service-meta">
+            <h3 class="service-name">{{ s.nombre }}</h3>
+            <div class="duration-badge">
+              <span class="material-icons">schedule</span>
+              <span>{{ s.duracion_min }} min</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="service-right">
+          <div class="price-value">${{ s.precio | number }}</div>
+          <div class="select-indicator">
+            <span class="material-icons indicator-icon">
+              {{ selectedService?.id === s.id ? 'check_circle' : 'radio_button_unchecked' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-placeholder" *ngIf="services.length === 0">
+        <span class="material-icons">sentiment_dissatisfied</span>
+        <p>No hay servicios activos disponibles en este momento.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: SELECT BARBER -->
+  <div *ngIf="step === 2" class="step-section">
+    <div class="step-back-row">
+      <button type="button" class="back-pill-btn" (click)="step = 1">
+        <span class="material-icons">arrow_back</span>
+        <span>Cambiar Servicio ({{ selectedService?.nombre }})</span>
+      </button>
+    </div>
+
+    <div class="section-heading">
+      <span class="eyebrow">PASO 2 DE 4</span>
+      <h1 class="main-title">Elige a tu Profesional</h1>
+      <p class="sub-title">Nuestros barberos maestros están listos para atenderte.</p>
+    </div>
+
+    <div class="barbers-grid" *ngIf="!loadingBarbers; else loader">
+      <div 
+        *ngFor="let barber of barbers" 
+        class="barber-luxury-card" 
+        [class.selected]="selectedBarber?.id === barber.id"
+        (click)="selectBarber(barber)">
+
+        <div class="barber-avatar-wrap">
+          <div class="avatar-circle">
+            <span class="avatar-initial">{{ barber.nombre.charAt(0) }}</span>
+          </div>
+          <div class="verified-dot" title="Activo y verificado">
+            <span class="material-icons">check</span>
+          </div>
+        </div>
+
+        <div class="barber-details">
+          <h3 class="barber-name">{{ barber.nombre }}</h3>
+          <div class="barber-rating">
+            <span class="star">★</span>
+            <span class="score">5.0</span>
+            <span class="badge-role">Master Barber</span>
+          </div>
+        </div>
+
+        <div class="barber-cta">
+          <span class="cta-badge">Seleccionar</span>
+        </div>
+      </div>
+
+      <div class="empty-placeholder" *ngIf="barbers.length === 0">
+        <span class="material-icons">person_off</span>
+        <p>No hay barberos disponibles en este momento.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: SELECT DATE & TIME -->
+  <div *ngIf="step === 3" class="step-section">
+    <div class="step-back-row">
+      <button type="button" class="back-pill-btn" (click)="step = 2">
+        <span class="material-icons">arrow_back</span>
+        <span>Cambiar Barbero ({{ selectedBarber?.nombre }})</span>
+      </button>
+    </div>
+
+    <div class="section-heading">
+      <span class="eyebrow">PASO 3 DE 4</span>
+      <h1 class="main-title">Fecha y Hora</h1>
+      <p class="sub-title">Atención personalizada con <strong>{{ selectedBarber?.nombre }}</strong>.</p>
+    </div>
+
+    <!-- Quick Dates Carousel -->
+    <div class="quick-dates-strip">
+      <button 
+        *ngFor="let q of quickDates" 
+        type="button" 
+        class="quick-date-chip" 
+        [class.selected]="selectedDate === q.dateString"
+        (click)="onSelectDate(q.dateString)">
+        <span class="qd-label">{{ q.label }}</span>
+        <span class="qd-num">{{ q.dayNum }}</span>
+      </button>
+    </div>
+
+    <!-- Custom Interactive Calendar -->
+    <div class="custom-calendar-card">
+      <div class="calendar-nav-header">
+        <span class="month-title">{{ calendarMonthYearLabel }}</span>
+        <div class="nav-arrows">
+          <button type="button" class="arrow-btn" (click)="prevMonth()" title="Mes anterior">
+            <span class="material-icons">chevron_left</span>
+          </button>
+          <button type="button" class="arrow-btn" (click)="nextMonth()" title="Mes siguiente">
+            <span class="material-icons">chevron_right</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="calendar-week-labels">
+        <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+      </div>
+
+      <div class="calendar-days-grid">
+        <button 
+          *ngFor="let d of calendarDays" 
+          type="button"
+          class="cal-day-cell" 
+          [class.other-month]="!d.isCurrentMonth"
+          [class.past]="d.isPast"
+          [class.today]="d.isToday"
+          [class.selected]="d.isSelected"
+          [disabled]="d.isPast || !d.isCurrentMonth"
+          (click)="onSelectDate(d.dateString)">
+          <span class="day-num">{{ d.dayNumber }}</span>
+          <span *ngIf="d.isToday && !d.isSelected" class="today-marker"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Selected Date Feedback -->
+    <div class="selected-date-indicator" *ngIf="selectedDate">
+      <span class="material-icons">event</span>
+      <span>{{ formattedSelectedDate }}</span>
+    </div>
+
+    <!-- Slots Area -->
+    <div class="time-slots-wrapper">
+      <div *ngIf="loadingSlots" class="slots-loading-state">
+        <app-loading-spinner message="Buscando horarios libres..." size="small"></app-loading-spinner>
+      </div>
+
+      <div *ngIf="!loadingSlots && selectedDate">
+        <!-- Morning Slots -->
+        <div class="slot-group" *ngIf="morningSlots.length > 0">
+          <div class="group-title">
+            <span class="material-icons group-icon">wb_sunny</span>
+            <span>Mañana</span>
+          </div>
+          <div class="chips-grid">
+            <button 
+              *ngFor="let slot of morningSlots" 
+              type="button" 
+              class="time-chip" 
+              [class.active]="selectedTime === slot"
+              (click)="selectTime(slot)">
+              {{ slot }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Afternoon Slots -->
+        <div class="slot-group" *ngIf="afternoonSlots.length > 0">
+          <div class="group-title">
+            <span class="material-icons group-icon">nightlight_round</span>
+            <span>Tarde / Noche</span>
+          </div>
+          <div class="chips-grid">
+            <button 
+              *ngFor="let slot of afternoonSlots" 
+              type="button" 
+              class="time-chip" 
+              [class.active]="selectedTime === slot"
+              (click)="selectTime(slot)">
+              {{ slot }}
+            </button>
+          </div>
+        </div>
+
+        <div class="no-slots-alert" *ngIf="morningSlots.length === 0 && afternoonSlots.length === 0">
+          <span class="material-icons">event_busy</span>
+          <p>No hay turnos disponibles para esta fecha. Intenta con otro día.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Action Bar (When Time Selected) -->
+    <div class="step-action-bar" *ngIf="selectedTime">
+      <div class="action-summary">
+        <span class="sum-label">Hora seleccionada:</span>
+        <span class="sum-value">{{ selectedTime }}</span>
+      </div>
+      <button type="button" class="btn btn-primary btn-lg" (click)="goToConfirmation()">
+        <span>Continuar al Resumen</span>
+        <span class="material-icons">arrow_forward</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 4: SUMMARY & CONFIRMATION -->
+  <div *ngIf="step === 4" class="step-section">
+    <div class="step-back-row">
+      <button type="button" class="back-pill-btn" (click)="step = 3">
+        <span class="material-icons">arrow_back</span>
+        <span>Modificar Fecha u Hora</span>
+      </button>
+    </div>
+
+    <div class="section-heading">
+      <span class="eyebrow">PASO 4 DE 4</span>
+      <h1 class="main-title">Resumen de tu Cita</h1>
+      <p class="sub-title">Verifica todos los detalles antes de agendar.</p>
+    </div>
+
+    <!-- Luxury Ticket Card -->
+    <div class="luxury-ticket-card">
+      <div class="ticket-header">
+        <div class="ticket-brand">
+          <span class="material-icons brand-icon">content_cut</span>
+          <span>BARBERÍA DIGITAL VIP</span>
+        </div>
+        <div class="ticket-status-pill">Por Confirmar</div>
+      </div>
+
+      <div class="ticket-divider"></div>
+
+      <div class="ticket-body">
+        <div class="ticket-row">
+          <div class="row-icon-cell">
+            <span class="material-icons">style</span>
+          </div>
+          <div class="row-content">
+            <span class="row-label">Servicio</span>
+            <span class="row-primary-val">{{ selectedService?.nombre }}</span>
+            <span class="row-sub-val">{{ selectedService?.duracion_min }} minutos de sesión</span>
+          </div>
+        </div>
+
+        <div class="ticket-row">
+          <div class="row-icon-cell">
+            <span class="material-icons">person</span>
+          </div>
+          <div class="row-content">
+            <span class="row-label">Barbero Asignado</span>
+            <span class="row-primary-val">{{ selectedBarber?.nombre }}</span>
+            <span class="row-sub-val">Especialista en estilo y corte</span>
+          </div>
+        </div>
+
+        <div class="ticket-row">
+          <div class="row-icon-cell">
+            <span class="material-icons">calendar_today</span>
+          </div>
+          <div class="row-content">
+            <span class="row-label">Fecha y Hora</span>
+            <span class="row-primary-val">{{ formattedSelectedDate }}</span>
+            <span class="row-sub-val highlight-time">{{ selectedTime }} hrs</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ticket-divider"></div>
+
+      <!-- Price Total -->
+      <div class="ticket-footer-price">
+        <div class="price-desc">
+          <span class="total-label">Total a Pagar en Tienda</span>
+          <span class="payment-mode">Efectivo, Tarjeta o Transferencia</span>
+        </div>
+        <div class="total-amount">${{ selectedServicePrecio | number }}</div>
+      </div>
+    </div>
+
+    <!-- Policy Box -->
+    <div class="policy-notice-box">
+      <span class="material-icons policy-icon">verified_user</span>
+      <div class="policy-text">
+        <strong>Cancelación Flexible:</strong> Puedes cancelar o reprogramar tu cita sin penalización hasta 2 horas antes desde tu panel de cliente.
+      </div>
+    </div>
+
+    <!-- Final CTA Button -->
+    <div class="confirm-cta-wrapper">
+      <button 
+        type="button" 
+        class="btn btn-primary btn-full btn-lg confirm-btn" 
+        (click)="confirmBooking()" 
+        [disabled]="submitting">
+        <span class="btn-text">Confirmar Reserva</span>
+        <span class="material-icons">check_circle</span>
+      </button>
+    </div>
+  </div>
+
+  <ng-template #loader>
+    <div class="loading-wrap">
+      <app-loading-spinner message="Cargando opciones..." size="medium"></app-loading-spinner>
+    </div>
+  </ng-template>
 
 </div>

@@ -1,33 +1,49 @@
-<nav class="bottom-nav" *ngIf="isAdmin || isClient">
+<div class="nav-container-wrapper" *ngIf="isAdmin || isClient">
+  <nav class="bottom-nav-dock">
     <!-- Client Menu -->
     <ng-container *ngIf="isClient">
-        <a routerLink="/home" class="nav-item" [class.active]="isActive('/home')">
-            <span class="material-icons">home</span>
-            <span class="label">Inicio</span>
-        </a>
-        <a routerLink="/booking" class="nav-item" [class.active]="isActive('/booking')">
-            <span class="material-icons">add_circle_outline</span>
-            <span class="label">Agendar</span>
-        </a>
-        <a routerLink="/appointments" class="nav-item" [class.active]="isActive('/appointments')">
-            <span class="material-icons">calendar_today</span>
-            <span class="label">Mis Citas</span>
-        </a>
+      <a routerLink="/home" class="nav-dock-item" [class.active]="isActive('/home')">
+        <div class="icon-wrap">
+          <span class="material-icons">home</span>
+        </div>
+        <span class="nav-label">Inicio</span>
+      </a>
+
+      <a routerLink="/booking" class="nav-dock-item highlight-item" [class.active]="isActive('/booking')">
+        <div class="icon-wrap highlight-icon">
+          <span class="material-icons">add</span>
+        </div>
+        <span class="nav-label">Agendar</span>
+      </a>
+
+      <a routerLink="/appointments" class="nav-dock-item" [class.active]="isActive('/appointments')">
+        <div class="icon-wrap">
+          <span class="material-icons">calendar_today</span>
+        </div>
+        <span class="nav-label">Mis Citas</span>
+      </a>
     </ng-container>
 
     <!-- Admin Menu -->
     <ng-container *ngIf="isAdmin">
-        <a routerLink="/admin/dashboard" class="nav-item" [class.active]="isActive('/admin/dashboard')">
-            <span class="material-icons">dashboard</span>
-            <span class="label">Tablero</span>
-        </a>
-        <a routerLink="/admin/agenda" class="nav-item" [class.active]="isActive('/admin/agenda')">
-            <span class="material-icons">view_agenda</span>
-            <span class="label">Agenda</span>
-        </a>
-        <a routerLink="/admin/reports" class="nav-item" [class.active]="isActive('/admin/reports')">
-            <span class="material-icons">bar_chart</span>
-            <span class="label">Reportes</span>
-        </a>
+      <a routerLink="/admin/dashboard" class="nav-dock-item" [class.active]="isActive('/admin/dashboard')">
+        <div class="icon-wrap">
+          <span class="material-icons">dashboard</span>
+        </div>
+        <span class="nav-label">Tablero</span>
+      </a>
+      <a routerLink="/admin/agenda" class="nav-dock-item" [class.active]="isActive('/admin/agenda')">
+        <div class="icon-wrap">
+          <span class="material-icons">view_agenda</span>
+        </div>
+        <span class="nav-label">Agenda</span>
+      </a>
+      <a routerLink="/admin/reports" class="nav-dock-item" [class.active]="isActive('/admin/reports')">
+        <div class="icon-wrap">
+          <span class="material-icons">bar_chart</span>
+        </div>
+        <span class="nav-label">Reportes</span>
+      </a>
     </ng-container>
-</nav>
+  </nav>
+</div>

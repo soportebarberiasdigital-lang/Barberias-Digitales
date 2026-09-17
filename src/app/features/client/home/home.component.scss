@@ -1,68 +1,468 @@
-.home-container {
-    padding: var(--spacing-md);
-    padding-bottom: 80px;
-    /* Space for bottom navbar */
+.dashboard-container {
+  padding: 20px 16px 96px 16px;
+  max-width: 540px;
+  margin: 0 auto;
 }
 
-.header {
-    margin-bottom: var(--spacing-lg);
-    text-align: center;
+/* Greeting Hero */
+.greeting-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 12px;
 }
 
-.header h1 {
-    font-size: var(--font-size-xl);
+.greeting-text {
+  display: flex;
+  flex-direction: column;
+
+  .greeting-subtitle {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
     color: var(--primary-color);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .greeting-title {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--text-color);
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .greeting-desc {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+  }
 }
 
-.header p {
+.quick-book-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+  color: #121212;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-gold);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+
+  .material-icons {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px var(--primary-glow-strong);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+/* Section Blocks */
+.section-block {
+  margin-bottom: 26px;
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.section-heading {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: var(--text-color);
+  letter-spacing: -0.01em;
+}
+
+.status-indicator-live {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--success-color);
+  background: var(--success-bg);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.section-sublink,
+.text-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* UPCOMING APPOINTMENT FEATURED CARD */
+.upcoming-appointment-card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(145deg, #1F1F1F 0%, #171717 100%);
+  border: 1px solid var(--border-highlight);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 1px var(--primary-glow);
+  overflow: hidden;
+}
+
+.card-glow-bg {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.upcoming-card-content {
+  position: relative;
+  z-index: 1;
+  padding: 20px;
+}
+
+.upcoming-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+  .appointment-type {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .card-icon {
+      font-size: 22px;
+      color: var(--primary-color);
+      background: rgba(192, 160, 96, 0.12);
+      padding: 6px;
+      border-radius: var(--radius-sm);
+    }
+
+    .service-name-hl {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+  }
+}
+
+.appointment-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 10px;
+  margin-bottom: 16px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .material-icons {
+    font-size: 18px;
     color: var(--text-muted);
-}
+  }
 
-.services-grid {
+  .meta-info {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+
+    .meta-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .meta-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-color);
+
+      &.highlight-gold {
+        color: var(--primary-light);
+      }
+    }
+  }
 }
 
-.service-card {
-    background-color: var(--surface-color);
-    padding: var(--spacing-md);
-    border-radius: var(--radius-md);
+.cancellation-policy-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  margin-bottom: 16px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+
+  .material-icons {
+    font-size: 15px;
+    color: var(--primary-color);
+    flex-shrink: 0;
+  }
+}
+
+.upcoming-actions {
+  display: flex;
+  gap: 10px;
+
+  .action-btn {
+    flex: 1;
+    height: 40px;
+    font-size: 0.85rem;
+    padding: 0 12px;
+  }
+
+  .danger-btn {
+    color: var(--error-color);
+    border: 1px solid rgba(224, 82, 82, 0.25);
+
+    &:hover {
+      background: rgba(224, 82, 82, 0.1);
+      border-color: var(--error-color);
+    }
+  }
+}
+
+/* NO UPCOMING STATE */
+.no-upcoming-card {
+  background: var(--surface-color);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 28px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  .empty-icon-ring {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(192, 160, 96, 0.1);
+    border: 1px solid var(--border-highlight);
     display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    border: 1px solid transparent;
-    transition: border-color 0.2s;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+
+    .material-icons {
+      font-size: 26px;
+    }
+  }
+
+  .no-upcoming-info {
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      max-width: 320px;
+    }
+  }
 }
 
-.service-card:hover {
-    /* Active state */
-    border-color: var(--primary-color);
+/* SERVICES COMPACT GRID */
+.services-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
-.service-info {
+.service-compact-card {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.22s ease;
+
+  &:hover {
+    border-color: var(--border-highlight);
+    background: #202020;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+
+    .book-arrow-btn {
+      background: var(--primary-color);
+      color: #121212;
+      border-color: var(--primary-color);
+    }
+  }
+
+  .service-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
+    margin-bottom: 10px;
 
-.service-info h3 {
-    font-size: var(--font-size-lg);
+    .service-icon-wrap {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      background: #252525;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-color);
+
+      .material-icons {
+        font-size: 18px;
+      }
+    }
+
+    .service-price {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary-light);
+    }
+  }
+
+  .service-title {
+    font-size: 0.92rem;
     font-weight: 600;
+    margin-bottom: 12px;
+    line-height: 1.3;
+    color: var(--text-color);
+  }
+
+  .service-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .service-duration {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+
+      .material-icons {
+        font-size: 13px;
+      }
+    }
+
+    .book-arrow-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #262626;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+
+      .material-icons {
+        font-size: 14px;
+      }
+    }
+  }
 }
 
-.price {
+/* RECENT APPOINTMENTS HISTORY */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-item-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: #1E1E1E;
+  }
+}
+
+.history-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .history-icon-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #252525;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--primary-color);
-    font-weight: 700;
+
+    .material-icons {
+      font-size: 18px;
+    }
+  }
+
+  .history-info {
+    display: flex;
+    flex-direction: column;
+
+    .history-service-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .history-barber {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+  }
 }
 
-.duration {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-}
-
-.loader-container {
-    text-align: center;
-    padding: var(--spacing-xl);
-    color: var(--text-muted);
+.loading-state-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
 }

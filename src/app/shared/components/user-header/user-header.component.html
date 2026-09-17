@@ -1,14 +1,31 @@
-<div class="user-header" *ngIf="currentUser">
-    <div class="user-info">
-        <div class="avatar">
-            {{ currentUser.name.charAt(0).toUpperCase() }}
-        </div>
-        <div class="user-details">
-            <span class="user-name">{{ currentUser.name }}</span>
-            <span class="user-role">{{ currentUser.role === 'admin' ? 'Administrador' : 'Cliente' }}</span>
-        </div>
+<header class="user-header-bar" *ngIf="currentUser">
+  <div class="header-inner">
+    <div class="brand-crest">
+      <div class="crest-icon-box">
+        <span class="material-icons crest-icon">content_cut</span>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">BARBERÍA DIGITAL</span>
+        <span class="brand-subtitle">STUDIO & SPA</span>
+      </div>
     </div>
-    <button class="logout-btn" (click)="logout()" title="Cerrar sesión">
+
+    <div class="user-action-group">
+      <div class="user-profile-badge">
+        <div class="avatar-ring">
+          <div class="avatar-initial">
+            {{ currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U' }}
+          </div>
+        </div>
+        <div class="user-text-meta">
+          <span class="user-name">{{ currentUser.name }}</span>
+          <span class="user-role">{{ currentUser.role === 'admin' ? 'Master Admin' : 'Cliente VIP' }}</span>
+        </div>
+      </div>
+
+      <button class="logout-action-btn" (click)="logout()" title="Cerrar sesión">
         <span class="material-icons">logout</span>
-    </button>
-</div>
+      </button>
+    </div>
+  </div>
+</header>

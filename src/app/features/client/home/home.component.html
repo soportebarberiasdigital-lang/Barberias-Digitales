@@ -1,22 +1,192 @@
-<div class="home-container">
-    <header class="header">
-        <h1>Servicios Disponibles</h1>
-        <p>Elige tu estilo</p>
-    </header>
+<div class="dashboard-container">
 
-    <div class="services-grid" *ngIf="!loading; else loader">
-        <div class="service-card" *ngFor="let service of services">
-            <div class="service-info">
-                <h3>{{ service.nombre }}</h3>
-                <span class="price">${{ service.precio | number }}</span>
-            </div>
-            <p class="duration">{{ service.duracion_min }} min</p>
-            <app-button variant="outline" label="Reservar"
-                (click)="bookService(service.id,service.precio)"></app-button>
-        </div>
+  <!-- Welcome Greeting Hero -->
+  <header class="greeting-header">
+    <div class="greeting-text">
+      <span class="greeting-subtitle">BIENVENIDO DE VUELTA</span>
+      <h1 class="greeting-title">
+        Hola, {{ clientFirstName }} 👋
+      </h1>
+      <p class="greeting-desc">Gestiona tus citas o reserva tu próxima sesión de estilo.</p>
     </div>
 
-    <ng-template #loader>
-        <app-loading-spinner message="Cargando servicios..." size="medium"></app-loading-spinner>
-    </ng-template>
+    <button type="button" class="quick-book-btn" (click)="goToNewBooking()" title="Agendar nueva cita">
+      <span class="material-icons">add</span>
+      <span>Agendar Cita</span>
+    </button>
+  </header>
+
+  <div *ngIf="!loading; else loader">
+
+    <!-- UPCOMING APPOINTMENT FEATURED CARD -->
+    <section class="section-block">
+      <div class="section-title-row">
+        <h2 class="section-heading">Tu Próxima Cita</h2>
+        <span class="status-indicator-live" *ngIf="upcomingAppointment">Activa</span>
+      </div>
+
+      <!-- If user has an upcoming appointment -->
+      <div class="upcoming-appointment-card" *ngIf="upcomingAppointment; else noUpcoming">
+        <div class="card-glow-bg"></div>
+
+        <div class="upcoming-card-content">
+          <div class="upcoming-header">
+            <div class="appointment-type">
+              <span class="material-icons card-icon">content_cut</span>
+              <span class="service-name-hl">{{ upcomingAppointment.services?.nombre }}</span>
+            </div>
+            <span class="status-badge" [class]="upcomingAppointment.estado">
+              {{ upcomingAppointment.estado }}
+            </span>
+          </div>
+
+          <div class="appointment-meta-grid">
+            <div class="meta-item">
+              <span class="material-icons">person</span>
+              <div class="meta-info">
+                <span class="meta-label">Barbero</span>
+                <span class="meta-value">{{ upcomingAppointment.barbers?.nombre }}</span>
+              </div>
+            </div>
+
+            <div class="meta-item">
+              <span class="material-icons">event</span>
+              <div class="meta-info">
+                <span class="meta-label">Fecha</span>
+                <span class="meta-value">{{ formatDate(upcomingAppointment.fecha) }}</span>
+              </div>
+            </div>
+
+            <div class="meta-item">
+              <span class="material-icons">schedule</span>
+              <div class="meta-info">
+                <span class="meta-label">Hora</span>
+                <span class="meta-value highlight-gold">{{ upcomingAppointment.hora.substring(0, 5) }} hrs</span>
+              </div>
+            </div>
+
+            <div class="meta-item">
+              <span class="material-icons">payments</span>
+              <div class="meta-info">
+                <span class="meta-label">Precio</span>
+                <span class="meta-value">${{ upcomingAppointment.precio | number }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Policy Notice -->
+          <div class="cancellation-policy-chip">
+            <span class="material-icons">info</span>
+            <span>Puedes cancelar o reprogramar sin costo hasta 2 horas antes de tu turno.</span>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="upcoming-actions">
+            <button 
+              type="button" 
+              class="btn btn-outline action-btn" 
+              (click)="reprogramAppointment(upcomingAppointment)">
+              <span class="material-icons">edit_calendar</span>
+              <span>Reprogramar</span>
+            </button>
+
+            <button 
+              type="button" 
+              class="btn btn-ghost danger-btn action-btn" 
+              (click)="cancelAppointment(upcomingAppointment.id!)"
+              [disabled]="cancelling">
+              <span class="material-icons">close</span>
+              <span>Cancelar Cita</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- If no upcoming appointment -->
+      <ng-template #noUpcoming>
+        <div class="no-upcoming-card">
+          <div class="empty-icon-ring">
+            <span class="material-icons">event_available</span>
+          </div>
+          <div class="no-upcoming-info">
+            <h3>No tienes citas pendientes</h3>
+            <p>¿Listo para un nuevo corte o arreglo de barba con nuestros profesionales?</p>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="goToNewBooking()">
+            <span class="material-icons">add_circle_outline</span>
+            <span>Reservar Ahora</span>
+          </button>
+        </div>
+      </ng-template>
+    </section>
+
+    <!-- QUICK SERVICES CAROUSEL / CATALOG -->
+    <section class="section-block">
+      <div class="section-title-row">
+        <h2 class="section-heading">Nuestros Servicios Exclusivos</h2>
+        <span class="section-sublink" (click)="goToNewBooking()">Ver catálogo</span>
+      </div>
+
+      <div class="services-compact-grid">
+        <div 
+          *ngFor="let service of services" 
+          class="service-compact-card"
+          (click)="bookService(service.id, service.precio)">
+          
+          <div class="service-top">
+            <div class="service-icon-wrap">
+              <span class="material-icons">{{ getServiceIcon(service.nombre) }}</span>
+            </div>
+            <span class="service-price">${{ service.precio | number }}</span>
+          </div>
+
+          <h3 class="service-title">{{ service.nombre }}</h3>
+
+          <div class="service-footer">
+            <span class="service-duration">
+              <span class="material-icons">schedule</span>
+              {{ service.duracion_min }} min
+            </span>
+            <span class="book-arrow-btn">
+              <span class="material-icons">arrow_forward</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECENT APPOINTMENTS HISTORY -->
+    <section class="section-block" *ngIf="pastAppointments.length > 0">
+      <div class="section-title-row">
+        <h2 class="section-heading">Historial de Citas Recientes</h2>
+        <button type="button" class="text-link" (click)="goToAllAppointments()">Ver todas</button>
+      </div>
+
+      <div class="history-list">
+        <div *ngFor="let app of pastAppointments" class="history-item-card">
+          <div class="history-left">
+            <div class="history-icon-circle">
+              <span class="material-icons">{{ getServiceIcon(app.services?.nombre || '') }}</span>
+            </div>
+            <div class="history-info">
+              <h4 class="history-service-name">{{ app.services?.nombre || 'Servicio de Barbería' }}</h4>
+              <span class="history-barber">Con {{ app.barbers?.nombre }} · {{ formatDate(app.fecha) }}</span>
+            </div>
+          </div>
+
+          <div class="history-right">
+            <span class="status-badge" [class]="app.estado">{{ app.estado }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <ng-template #loader>
+    <div class="loading-state-wrapper">
+      <app-loading-spinner message="Cargando tu panel de cliente..." size="medium"></app-loading-spinner>
+    </div>
+  </ng-template>
+
 </div>

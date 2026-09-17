@@ -1,31 +1,130 @@
-<div class="appointments-container">
-    <div class="header">
-        <h1>Mis Citas</h1>
+<div class="appointments-page-container">
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-titles">
+      <span class="eyebrow">AGENDA PERSONAL</span>
+      <h1 class="page-title">Mis Citas</h1>
+      <p class="page-desc">Consulta tus turnos confirmados y tu historial de servicios.</p>
     </div>
 
-    <div class="appointments-list" *ngIf="!loading; else loader">
-        <div class="appointment-card" *ngFor="let app of appointments" [class.cancelada]="app.estado === 'cancelada'">
-            <div class="app-header">
-                <span class="status" [class]="app.estado">{{ app.estado }}</span>
-                <span class="date">{{ app.fecha }} - {{ app.hora }}</span>
-            </div>
+    <button type="button" class="btn btn-primary new-booking-btn" (click)="goToBooking()">
+      <span class="material-icons">add</span>
+      <span>Nueva Cita</span>
+    </button>
+  </header>
 
-            <div class="app-details">
-                <h3>{{ app.services?.nombre }}</h3>
-                <p>Barbero: {{ app.barbers?.nombre }}</p>
-            </div>
+  <!-- Filter Tabs -->
+  <div class="filter-tabs-bar">
+    <button 
+      type="button" 
+      class="filter-tab" 
+      [class.active]="filterTab === 'all'" 
+      (click)="filterTab = 'all'">
+      <span>Todas</span>
+      <span class="count-badge">{{ appointments.length }}</span>
+    </button>
+    <button 
+      type="button" 
+      class="filter-tab" 
+      [class.active]="filterTab === 'upcoming'" 
+      (click)="filterTab = 'upcoming'">
+      <span>Próximas</span>
+    </button>
+    <button 
+      type="button" 
+      class="filter-tab" 
+      [class.active]="filterTab === 'history'" 
+      (click)="filterTab = 'history'">
+      <span>Historial</span>
+    </button>
+  </div>
 
-            <div class="actions" *ngIf="app.estado !== 'cancelada' && app.estado !== 'completada'">
-                <app-button variant="outline" label="Cancelar" (click)="cancelAppointment(app.id!)"></app-button>
-            </div>
+  <!-- Appointments List -->
+  <div class="appointments-stack" *ngIf="!loading; else loader">
+    
+    <div 
+      *ngFor="let app of filteredAppointments" 
+      class="appointment-card" 
+      [class.card-cancelled]="app.estado === 'cancelada'">
+      
+      <!-- Card Top -->
+      <div class="card-head">
+        <div class="service-lead">
+          <div class="service-icon-box">
+            <span class="material-icons">{{ getServiceIcon(app.services?.nombre || '') }}</span>
+          </div>
+          <div class="service-title-wrap">
+            <h3 class="service-name">{{ app.services?.nombre || 'Servicio Barbería' }}</h3>
+            <span class="barber-assigned">Con {{ app.barbers?.nombre }}</span>
+          </div>
         </div>
 
-        <div class="empty-state" *ngIf="appointments.length === 0">
-            <p>No tienes citas programadas.</p>
+        <span class="status-badge" [class]="app.estado">{{ app.estado }}</span>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <!-- Card Details -->
+      <div class="card-details-grid">
+        <div class="detail-cell">
+          <span class="material-icons cell-icon">event</span>
+          <div class="cell-info">
+            <span class="cell-label">Fecha</span>
+            <span class="cell-val">{{ formatDate(app.fecha) }}</span>
+          </div>
         </div>
+
+        <div class="detail-cell">
+          <span class="material-icons cell-icon">schedule</span>
+          <div class="cell-info">
+            <span class="cell-label">Hora</span>
+            <span class="cell-val highlight-gold">{{ app.hora.substring(0, 5) }} hrs</span>
+          </div>
+        </div>
+
+        <div class="detail-cell">
+          <span class="material-icons cell-icon">payments</span>
+          <div class="cell-info">
+            <span class="cell-label">Precio</span>
+            <span class="cell-val">${{ app.precio | number }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="card-actions" *ngIf="app.estado === 'pendiente' || app.estado === 'confirmada'">
+        <button type="button" class="btn btn-outline btn-sm" (click)="reprogram(app)">
+          <span class="material-icons">edit_calendar</span>
+          <span>Reprogramar</span>
+        </button>
+        <button type="button" class="btn btn-ghost btn-sm danger-btn" (click)="cancelAppointment(app.id!)">
+          <span class="material-icons">close</span>
+          <span>Cancelar</span>
+        </button>
+      </div>
+
     </div>
 
-    <ng-template #loader>
-        <app-loading-spinner message="Cargando citas..." size="medium"></app-loading-spinner>
-    </ng-template>
+    <!-- Empty State -->
+    <div class="empty-state-box" *ngIf="filteredAppointments.length === 0">
+      <div class="empty-icon-circle">
+        <span class="material-icons">event_busy</span>
+      </div>
+      <h3>No hay citas en este filtro</h3>
+      <p>Cuando programes una cita con tu barbero favorito aparecerá aquí.</p>
+      <button type="button" class="btn btn-primary" (click)="goToBooking()">
+        <span class="material-icons">add</span>
+        <span>Reservar Cita</span>
+      </button>
+    </div>
+
+  </div>
+
+  <ng-template #loader>
+    <div class="loader-wrap">
+      <app-loading-spinner message="Cargando tu agenda..." size="medium"></app-loading-spinner>
+    </div>
+  </ng-template>
+
 </div>

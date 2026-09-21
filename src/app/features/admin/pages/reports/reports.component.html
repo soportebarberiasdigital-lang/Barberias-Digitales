@@ -1,0 +1,120 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><span class="title-icon">📈</span> Reportes Excel</h1>
+      <p class="page-subtitle">Exporta estadísticas mensuales de la barbería</p>
+    </div>
+  </div>
+
+  <!-- ── CONTROLS ──────────────────────────────────────────────────────────── -->
+  <div class="controls-card" [formGroup]="form">
+    <div class="controls-row">
+      <div class="control-group">
+        <label class="control-label">Mes</label>
+        <select class="select-input" formControlName="month" (change)="loadPreview()">
+          <option *ngFor="let m of months" [value]="m.value">{{ m.label }}</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label class="control-label">Año</label>
+        <select class="select-input" formControlName="year" (change)="loadPreview()">
+          <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+        </select>
+      </div>
+      <button class="btn-export" (click)="generateExcel()" [disabled]="generating() || loading()">
+        <span *ngIf="!generating()">⬇️ Generar Reporte Excel</span>
+        <span *ngIf="generating()">Generando...</span>
+      </button>
+    </div>
+    <p class="period-label">Período: <strong>{{ getMonthLabel() }}</strong></p>
+  </div>
+
+  <!-- ── LOADING ─────────────────────────────────────────────────────────── -->
+  <div *ngIf="loading()" class="loading-state">
+    <div class="spinner"></div>
+    <span>Cargando datos del mes...</span>
+  </div>
+
+  <ng-container *ngIf="!loading()">
+    <!-- ── EMPTY ──────────────────────────────────────────────────────────── -->
+    <div *ngIf="!hasData()" class="empty-state">
+      <span class="empty-icon">📭</span>
+      <p>No hay citas registradas en <strong>{{ getMonthLabel() }}</strong></p>
+    </div>
+
+    <!-- ── PREVIEW ────────────────────────────────────────────────────────── -->
+    <ng-container *ngIf="hasData()">
+      <!-- KPI Summary -->
+      <div class="kpi-row">
+        <div class="kpi-card kpi-gold">
+          <div class="kpi-icon">💰</div>
+          <div class="kpi-body">
+            <span class="kpi-label">Ingresos del Mes</span>
+            <span class="kpi-value">${{ totalIngresos() | number:'1.0-0' }}</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">📅</div>
+          <div class="kpi-body">
+            <span class="kpi-label">Total Citas</span>
+            <span class="kpi-value">{{ totalCitas() }}</span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-success">
+          <div class="kpi-icon">✅</div>
+          <div class="kpi-body">
+            <span class="kpi-label">Completadas</span>
+            <span class="kpi-value">{{ totalCompletadas() }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barber Summary Preview -->
+      <div class="section-card">
+        <h2 class="section-title">Resumen por Barbero — Hoja 1 del Excel</h2>
+        <div class="table-wrapper">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>Barbero</th>
+                <th>Citas Completadas</th>
+                <th>Ingresos Generados</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let b of barberSummary()">
+                <td>
+                  <div class="barber-chip">
+                    <div class="barber-avatar">{{ b.nombre[0] }}</div>
+                    {{ b.nombre }}
+                  </div>
+                </td>
+                <td class="center">{{ b.citas }}</td>
+                <td class="price">${{ b.ingresos | number:'1.0-0' }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td><strong>TOTAL BARBERÍA</strong></td>
+                <td class="center"><strong>{{ totalCompletadas() }}</strong></td>
+                <td class="price"><strong>${{ totalIngresos() | number:'1.0-0' }}</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Excel Preview note -->
+      <div class="excel-note">
+        <span class="note-icon">📊</span>
+        <div>
+          <strong>El archivo Excel incluirá 2 hojas:</strong>
+          <ul>
+            <li><em>Hoja 1 — Resumen por Barbero:</em> totales de citas e ingresos por barbero</li>
+            <li><em>Hoja 2 — Citas Detalladas:</em> listado completo de {{ totalCitas() }} citas con fecha, cliente, servicio y monto</li>
+          </ul>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>

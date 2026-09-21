@@ -1,0 +1,115 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><span class="title-icon">🏪</span> Perfil de la Barbería</h1>
+      <p class="page-subtitle">Configura los datos de tu negocio</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="loading-state">
+    <div class="spinner"></div>
+    <span>Cargando perfil...</span>
+  </div>
+
+  <div class="profile-layout" *ngIf="!loading()">
+    <!-- Logo Column -->
+    <div class="logo-column">
+      <div class="logo-card">
+        <h3 class="card-title">Logo de la Barbería</h3>
+        <div class="logo-preview-area">
+          <img *ngIf="logoPreview()" [src]="logoPreview()!" alt="Logo" class="logo-img" />
+          <div *ngIf="!logoPreview()" class="logo-placeholder">
+            <span>✂</span>
+            <small>Sin logo</small>
+          </div>
+        </div>
+        <label class="btn-upload" for="logoInput">
+          📁 Cambiar Logo
+        </label>
+        <input id="logoInput" type="file" accept="image/*" (change)="onLogoSelected($event)" hidden />
+        <p class="upload-hint">JPG, PNG, SVG. Recomendado: 400×400px</p>
+      </div>
+    </div>
+
+    <!-- Form Column -->
+    <div class="form-column">
+      <form [formGroup]="form" (ngSubmit)="saveProfile()" class="profile-form">
+
+        <!-- Información Básica -->
+        <div class="form-section">
+          <div class="section-label">Información del Local</div>
+
+          <div class="form-group">
+            <label class="form-label">Nombre Comercial *</label>
+            <input
+              class="form-input"
+              formControlName="nombre"
+              placeholder="Ej: Barbería El Estilo"
+              [class.error]="isInvalid('nombre')"
+            />
+            <span class="error-msg" *ngIf="isInvalid('nombre')">El nombre es requerido</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Teléfono de Contacto</label>
+              <input
+                class="form-input"
+                formControlName="telefono"
+                placeholder="+57 300 000 0000"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dirección Física</label>
+              <input
+                class="form-input"
+                formControlName="direccion"
+                placeholder="Calle 123 # 45 - 67"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Horarios -->
+        <div class="form-section">
+          <div class="section-label">Horario de Atención</div>
+
+          <div class="schedule-grid">
+            <div class="schedule-card opening">
+              <div class="schedule-icon">🌅</div>
+              <div class="schedule-info">
+                <label class="form-label">Apertura</label>
+                <input
+                  type="time"
+                  class="form-input time-input"
+                  formControlName="horario_apertura"
+                  [class.error]="isInvalid('horario_apertura')"
+                />
+              </div>
+            </div>
+            <div class="schedule-separator">→</div>
+            <div class="schedule-card closing">
+              <div class="schedule-icon">🌙</div>
+              <div class="schedule-info">
+                <label class="form-label">Cierre</label>
+                <input
+                  type="time"
+                  class="form-input time-input"
+                  formControlName="horario_cierre"
+                  [class.error]="isInvalid('horario_cierre')"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-save" [disabled]="saving()">
+          <span *ngIf="!saving()">💾 Guardar Cambios</span>
+          <span *ngIf="saving()">Guardando...</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

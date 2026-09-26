@@ -169,7 +169,6 @@ export class BookingService {
         return from(promise);
     }
 
-    // --- Admin Methods ---
     getAllTodayAppointments(): Observable<Appointment[]> {
         const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
         return this.getAllAppointmentsByDate(today);

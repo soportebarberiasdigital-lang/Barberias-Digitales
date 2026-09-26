@@ -78,7 +78,14 @@ export class BookingService {
             .select('*')
             .eq('activo', true);
 
-        return from(promise).pipe(map(res => res.data as Barber[] || []));
+        return from(promise).pipe(
+            map(res => {
+                if (res.error) {
+                    console.error('Error fetching barbers from Supabase:', res.error);
+                }
+                return (res.data as Barber[]) || [];
+            })
+        );
     }
 
     // --- Services ---
@@ -88,7 +95,14 @@ export class BookingService {
             .select('*')
             .eq('activo', true);
 
-        return from(promise).pipe(map(res => res.data as Service[] || []));
+        return from(promise).pipe(
+            map(res => {
+                if (res.error) {
+                    console.error('Error fetching services from Supabase:', res.error);
+                }
+                return (res.data as Service[]) || [];
+            })
+        );
     }
 
     // --- Barber Schedules ---
@@ -98,9 +112,16 @@ export class BookingService {
             .select('*')
             .eq('barber_id', barberId)
             .eq('dia_semana', diaSemana)
-            .single();
+            .maybeSingle();
 
-        return from(promise).pipe(map(res => res.data as BarberSchedule || null));
+        return from(promise).pipe(
+            map(res => {
+                if (res.error) {
+                    console.error('Error fetching barber schedule:', res.error);
+                }
+                return (res.data as BarberSchedule) || null;
+            })
+        );
     }
 
     // --- Blocked Times ---
@@ -111,7 +132,14 @@ export class BookingService {
             .eq('barber_id', barberId)
             .eq('fecha', fecha);
 
-        return from(promise).pipe(map(res => res.data as BlockedTime[] || []));
+        return from(promise).pipe(
+            map(res => {
+                if (res.error) {
+                    console.error('Error fetching blocked times:', res.error);
+                }
+                return (res.data as BlockedTime[]) || [];
+            })
+        );
     }
 
     // --- Barberia Config ---
@@ -120,9 +148,16 @@ export class BookingService {
             .from('barberia_config')
             .select('*')
             .limit(1)
-            .single();
+            .maybeSingle();
 
-        return from(promise).pipe(map(res => res.data as BarberiaConfig || null));
+        return from(promise).pipe(
+            map(res => {
+                if (res.error) {
+                    console.error('Error fetching barberia config:', res.error);
+                }
+                return (res.data as BarberiaConfig) || null;
+            })
+        );
     }
 
     // --- Appointments ---
@@ -134,7 +169,14 @@ export class BookingService {
             .eq('fecha', date)
             .neq('estado', 'cancelada');
 
-        return from(promise).pipe(map(res => res.data as Appointment[] || []));
+        return from(promise).pipe(
+            map(res => {
+                if (res.error) {
+                    console.error('Error fetching appointments for barber:', res.error);
+                }
+                return (res.data as Appointment[]) || [];
+            })
+        );
     }
 
     getUserAppointments(clientId: string): Observable<Appointment[]> {
@@ -149,7 +191,14 @@ export class BookingService {
             .order('fecha', { ascending: false })
             .order('hora', { ascending: false });
 
-        return from(promise).pipe(map(res => res.data as Appointment[] || []));
+        return from(promise).pipe(
+            map(res => {
+                if (res.error) {
+                    console.error('Error fetching user appointments:', res.error);
+                }
+                return (res.data as Appointment[]) || [];
+            })
+        );
     }
 
     createAppointment(appointment: Appointment): Observable<any> {

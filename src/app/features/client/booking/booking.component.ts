@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { BookingService, Barber, Service, Appointment } from '../../../core/services/booking.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -269,7 +270,7 @@ export class BookingComponent implements OnInit {
     this.loadSlots();
   }
 
-  loadSlots() {
+  async loadSlots() {
     if (!this.selectedBarber || !this.selectedDate) return;
     this.loadingSlots = true;
     this.morningSlots = [];
@@ -278,19 +279,21 @@ export class BookingComponent implements OnInit {
     const selectedDateObj = new Date(this.selectedDate + 'T00:00:00');
     const diaSemana = selectedDateObj.getDay() === 0 ? 7 : selectedDateObj.getDay();
 
-    Promise.all([
-      this.bookingService.getBarberSchedule(this.selectedBarber.id, diaSemana).toPromise(),
-      this.bookingService.getBlockedTimes(this.selectedBarber.id, this.selectedDate).toPromise(),
-      this.bookingService.getAppointmentsForBarber(this.selectedBarber.id, this.selectedDate).toPromise(),
-      this.bookingService.getBarberiaConfig().toPromise()
-    ]).then(([schedule, blockedTimes, appointments, config]) => {
+    try {
+      const [schedule, blockedTimes, appointments, config] = await Promise.all([
+        firstValueFrom(this.bookingService.getBarberSchedule(this.selectedBarber.id, diaSemana)).catch(() => null),
+        firstValueFrom(this.bookingService.getBlockedTimes(this.selectedBarber.id, this.selectedDate)).catch(() => []),
+        firstValueFrom(this.bookingService.getAppointmentsForBarber(this.selectedBarber.id, this.selectedDate)).catch(() => []),
+        firstValueFrom(this.bookingService.getBarberiaConfig()).catch(() => null)
+      ]);
+
       let startTime = '09:00';
       let endTime = '19:30';
 
-      if (schedule) {
+      if (schedule && schedule.hora_inicio && schedule.hora_fin) {
         startTime = schedule.hora_inicio.substring(0, 5);
         endTime = schedule.hora_fin.substring(0, 5);
-      } else if (config) {
+      } else if (config && config.horario_apertura && config.horario_cierre) {
         startTime = config.horario_apertura.substring(0, 5);
         endTime = config.horario_cierre.substring(0, 5);
       }
@@ -302,7 +305,7 @@ export class BookingComponent implements OnInit {
 
       const available = allSlots.filter(s => !unavailable.includes(s));
 
-      // Separate into Morning (< 12:30) and Afternoon (>= 12:30)
+      // Separate into Morning (< 13:00) and Afternoon (>= 13:00)
       this.morningSlots = available.filter(time => {
         const hour = parseInt(time.split(':')[0], 10);
         return hour < 13;
@@ -312,12 +315,11 @@ export class BookingComponent implements OnInit {
         const hour = parseInt(time.split(':')[0], 10);
         return hour >= 13;
       });
-
-      this.loadingSlots = false;
-    }).catch(err => {
+    } catch (err) {
       console.error('Error loading slots:', err);
+    } finally {
       this.loadingSlots = false;
-    });
+    }
   }
 
   selectTime(time: string) {

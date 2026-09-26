@@ -71,13 +71,13 @@ export class AuthService {
      * Garantiza la obtención del usuario actual resolviendo la sesión de Supabase Auth
      */
     async ensureUserLoaded(): Promise<AppUser | null> {
-        if (this._currentUser.value) {
-            return this._currentUser.value;
-        }
-
         const authUser = await this.getAuthenticatedUser();
         if (authUser) {
             return await this.syncSessionUser(authUser);
+        }
+
+        if (this._currentUser.value) {
+            return this._currentUser.value;
         }
 
         return null;

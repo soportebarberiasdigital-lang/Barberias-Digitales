@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { BookingService, Service, Appointment } from '../../../core/services/booking.service';
 import { AuthService, AppUser } from '../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -44,14 +45,16 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  loadDashboardData(userId: string) {
+  async loadDashboardData(userId: string) {
     this.loading = true;
 
-    // Fetch services and user appointments in parallel
-    Promise.all([
-      this.bookingService.getActiveServices().toPromise(),
-      this.bookingService.getUserAppointments(userId).toPromise()
-    ]).then(([services, appointments]) => {
+    try {
+      // Fetch services and user appointments in parallel
+      const [services, appointments] = await Promise.all([
+        firstValueFrom(this.bookingService.getActiveServices()).catch(() => []),
+        firstValueFrom(this.bookingService.getUserAppointments(userId)).catch(() => [])
+      ]);
+
       this.services = services || [];
 
       if (appointments && appointments.length > 0) {
@@ -73,12 +76,11 @@ export class HomeComponent implements OnInit {
         this.upcomingAppointment = null;
         this.pastAppointments = [];
       }
-
-      this.loading = false;
-    }).catch(err => {
+    } catch (err) {
       console.error('Error loading dashboard data:', err);
+    } finally {
       this.loading = false;
-    });
+    }
   }
 
   loadServicesOnly() {

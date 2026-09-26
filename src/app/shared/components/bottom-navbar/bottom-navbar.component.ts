@@ -29,7 +29,7 @@ export class BottomNavbarComponent implements OnInit {
     this.authService.currentUser$.subscribe(user => {
       if (user) {
         this.isAdmin = user.role === 'admin';
-        this.isClient = user.role === 'client';
+        this.isClient = user.role === 'cliente' || user.role === 'client';
       } else {
         this.isAdmin = false;
         this.isClient = false;

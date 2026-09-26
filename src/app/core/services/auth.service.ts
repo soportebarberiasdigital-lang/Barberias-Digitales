@@ -5,10 +5,10 @@ import { BehaviorSubject, Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 
-export type UserRole = 'admin' | 'client' | null;
+export type UserRole = 'admin' | 'cliente' | 'client' | null;
 
 export interface AppUser {
-    id: string; // Supabase Auth ID for admin, or Client UUID for client
+    id: string; // Supabase Auth ID
     name: string;
     role: UserRole;
     phone?: string;
@@ -31,11 +31,7 @@ export class AuthService {
             if (session?.user) {
                 const user = await this.syncSessionUser(session.user);
                 if (window.location.pathname === '/login' || window.location.pathname === '/') {
-                    if (user.role === 'admin') {
-                        this.router.navigate(['/admin/dashboard']);
-                    } else {
-                        this.router.navigate(['/booking']);
-                    }
+                    this.redirectUserByRole(user);
                 }
             } else if (event === 'SIGNED_OUT') {
                 localStorage.removeItem('barber_app_user');
@@ -71,6 +67,39 @@ export class AuthService {
         return null;
     }
 
+    /**
+     * Garantiza la obtención del usuario actual resolviendo la sesión de Supabase Auth
+     */
+    async ensureUserLoaded(): Promise<AppUser | null> {
+        if (this._currentUser.value) {
+            return this._currentUser.value;
+        }
+
+        const authUser = await this.getAuthenticatedUser();
+        if (authUser) {
+            return await this.syncSessionUser(authUser);
+        }
+
+        return null;
+    }
+
+    /**
+     * Redirige al usuario a su panel correspondiente según su rol en public.profiles
+     */
+    redirectUserByRole(user?: AppUser | null) {
+        const currentUser = user !== undefined ? user : this._currentUser.value;
+        if (!currentUser) {
+            this.router.navigate(['/login']);
+            return;
+        }
+
+        if (currentUser.role === 'admin') {
+            this.router.navigate(['/admin/dashboard']);
+        } else {
+            this.router.navigate(['/cliente/reservar']);
+        }
+    }
+
     async syncSessionUser(user: User): Promise<AppUser> {
         let profile = null;
         try {
@@ -87,10 +116,28 @@ export class AuthService {
         const fullName = profile?.nombre || 
             user.user_metadata?.['full_name'] || 
             user.user_metadata?.['name'] || 
+            user.user_metadata?.['nombre'] || 
             user.email?.split('@')[0] || 
             'Cliente';
 
-        const role: UserRole = (profile?.rol === 'admin') ? 'admin' : 'client';
+        const role: UserRole = (profile?.rol === 'admin') ? 'admin' : 'cliente';
+
+        // Si el perfil no existía, asegurar que se cree en public.profiles
+        if (!profile) {
+            try {
+                await this.supabaseService.client
+                    .from('profiles')
+                    .upsert({
+                        id: user.id,
+                        email: user.email,
+                        nombre: fullName,
+                        rol: role,
+                        telefono: user.phone || null
+                    });
+            } catch (err) {
+                console.error('Error upserting initial profile:', err);
+            }
+        }
 
         const appUser: AppUser = {
             id: user.id,
@@ -110,7 +157,7 @@ export class AuthService {
             const { data, error } = await this.supabaseService.client.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${window.location.origin}/booking`
+                    redirectTo: `${window.location.origin}/cliente/reservar`
                 }
             });
 

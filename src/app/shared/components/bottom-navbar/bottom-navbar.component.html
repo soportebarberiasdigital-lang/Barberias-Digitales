@@ -2,21 +2,14 @@
   <nav class="bottom-nav-dock">
     <!-- Client Menu -->
     <ng-container *ngIf="isClient">
-      <a routerLink="/home" class="nav-dock-item" [class.active]="isActive('/home')">
-        <div class="icon-wrap">
-          <span class="material-icons">home</span>
-        </div>
-        <span class="nav-label">Inicio</span>
-      </a>
-
-      <a routerLink="/booking" class="nav-dock-item highlight-item" [class.active]="isActive('/booking')">
+      <a routerLink="/cliente/reservar" class="nav-dock-item highlight-item" [class.active]="isActive('/cliente/reservar') || isActive('/booking')">
         <div class="icon-wrap highlight-icon">
           <span class="material-icons">add</span>
         </div>
         <span class="nav-label">Agendar</span>
       </a>
 
-      <a routerLink="/appointments" class="nav-dock-item" [class.active]="isActive('/appointments')">
+      <a routerLink="/cliente/mis-citas" class="nav-dock-item" [class.active]="isActive('/cliente/mis-citas') || isActive('/appointments')">
         <div class="icon-wrap">
           <span class="material-icons">calendar_today</span>
         </div>

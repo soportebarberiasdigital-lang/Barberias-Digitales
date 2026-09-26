@@ -39,11 +39,7 @@ export class LoginComponent implements OnInit {
       const { data: { session } } = await this.authService.getSupabaseSession();
       if (session?.user) {
         const user = await this.authService.syncSessionUser(session.user);
-        if (user.role === 'admin') {
-          this.router.navigate(['/admin/dashboard']);
-        } else {
-          this.router.navigate(['/booking']);
-        }
+        this.authService.redirectUserByRole(user);
         return;
       }
     } catch (e) {
@@ -53,11 +49,7 @@ export class LoginComponent implements OnInit {
     // 2. Check local user state
     const user = this.authService.currentUser;
     if (user) {
-      if (user.role === 'admin') {
-        this.router.navigate(['/admin/dashboard']);
-      } else {
-        this.router.navigate(['/booking']);
-      }
+      this.authService.redirectUserByRole(user);
     }
   }
 
@@ -114,11 +106,7 @@ export class LoginComponent implements OnInit {
     this.loading = false;
     this.toastService.success('¡Acceso concedido!');
     setTimeout(() => {
-      if (user?.role === 'admin') {
-        this.router.navigate(['/admin/dashboard']);
-      } else {
-        this.router.navigate(['/booking']);
-      }
+      this.authService.redirectUserByRole(user);
     }, 400);
   }
 
@@ -148,11 +136,7 @@ export class LoginComponent implements OnInit {
     this.showRegisterPromptModal = false;
     this.toastService.success(`¡Cuenta creada exitosamente! Bienvenido, ${cleanName}.`);
     setTimeout(() => {
-      if (user?.role === 'admin') {
-        this.router.navigate(['/admin/dashboard']);
-      } else {
-        this.router.navigate(['/booking']);
-      }
+      this.authService.redirectUserByRole(user);
     }, 400);
   }
 

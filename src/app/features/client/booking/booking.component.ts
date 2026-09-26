@@ -462,7 +462,7 @@ export class BookingComponent implements OnInit {
       next: () => {
         this.submitting = false;
         this.toastService.success('¡Tu cita ha sido agendada con éxito!', 'Reserva Confirmada');
-        setTimeout(() => this.router.navigate(['/appointments']), 800);
+        setTimeout(() => this.router.navigate(['/cliente/mis-citas']), 800);
       },
       error: (err) => {
         this.submitting = false;

@@ -65,11 +65,11 @@ export class AppointmentsComponent implements OnInit {
   }
 
   goToBooking() {
-    this.router.navigate(['/booking']);
+    this.router.navigate(['/cliente/reservar']);
   }
 
   reprogram(app: Appointment) {
-    this.router.navigate(['/booking'], {
+    this.router.navigate(['/cliente/reservar'], {
       queryParams: {
         serviceId: app.service_id,
         precio: app.precio

@@ -36,7 +36,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
-      if (user && user.role === 'client') {
+      if (user && (user.role === 'cliente' || user.role === 'client')) {
         this.loadDashboardData(user.id);
       } else {
         this.loadServicesOnly();
@@ -94,19 +94,19 @@ export class HomeComponent implements OnInit {
   }
 
   bookService(serviceId: string, precio: number) {
-    this.router.navigate(['/booking'], { queryParams: { serviceId, precio } });
+    this.router.navigate(['/cliente/reservar'], { queryParams: { serviceId, precio } });
   }
 
   goToNewBooking() {
-    this.router.navigate(['/booking']);
+    this.router.navigate(['/cliente/reservar']);
   }
 
   goToAllAppointments() {
-    this.router.navigate(['/appointments']);
+    this.router.navigate(['/cliente/mis-citas']);
   }
 
   reprogramAppointment(app: Appointment) {
-    this.router.navigate(['/booking'], {
+    this.router.navigate(['/cliente/reservar'], {
       queryParams: {
         serviceId: app.service_id,
         precio: app.precio

@@ -170,7 +170,7 @@ export class BookingService {
     }
 
     getAllTodayAppointments(): Observable<Appointment[]> {
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const today = new Date().toISOString().split('T')[0];
         return this.getAllAppointmentsByDate(today);
     }
 

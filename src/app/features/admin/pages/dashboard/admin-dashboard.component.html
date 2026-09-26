@@ -1,0 +1,167 @@
+<!-- ── PAGE HEADER ─────────────────────────────────────────────────────────── -->
+<div class="page-wrapper">
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">
+        <span class="title-icon">📊</span>
+        Dashboard
+        <span class="title-date" *ngIf="isToday()">— Hoy</span>
+      </h1>
+      <p class="page-subtitle">Resumen de citas y métricas del día</p>
+    </div>
+    <div class="header-controls">
+      <!-- Date Picker -->
+      <div class="control-group">
+        <label class="control-label">Fecha</label>
+        <input
+          type="date"
+          class="date-input"
+          [value]="selectedDate()"
+          (change)="onDateChange($event)"
+        />
+      </div>
+      <!-- Barber Filter -->
+      <div class="control-group">
+        <label class="control-label">Barbero</label>
+        <select class="barber-select" [value]="selectedBarberId()" (change)="onBarberFilterChange($any($event.target).value)">
+          <option value="all">Toda la Barbería</option>
+          <option *ngFor="let b of barbers()" [value]="b.id">{{ b.nombre }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LOADING ─────────────────────────────────────────────────────────── -->
+  <div *ngIf="loading()" class="loading-state">
+    <div class="spinner"></div>
+    <span>Cargando información...</span>
+  </div>
+
+  <ng-container *ngIf="!loading()">
+    <!-- ── KPI CARDS ───────────────────────────────────────────────────────── -->
+    <div class="kpi-grid">
+      <!-- Ingresos -->
+      <div class="kpi-card kpi-gold">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-body">
+          <span class="kpi-label">Ingresos del Día</span>
+          <span class="kpi-value">${{ kpiIngresos() | number:'1.0-0' }}</span>
+        </div>
+        <div class="kpi-glow"></div>
+      </div>
+
+      <!-- Servicios realizados -->
+      <div class="kpi-card">
+        <div class="kpi-icon">✂️</div>
+        <div class="kpi-body">
+          <span class="kpi-label">Servicios Realizados</span>
+          <span class="kpi-value">{{ kpiServicios() }}</span>
+        </div>
+      </div>
+
+      <!-- Pendientes -->
+      <div class="kpi-card kpi-warning">
+        <div class="kpi-icon">⏳</div>
+        <div class="kpi-body">
+          <span class="kpi-label">Pendientes</span>
+          <span class="kpi-value">{{ kpiPendientes() }}</span>
+        </div>
+      </div>
+
+      <!-- Confirmadas -->
+      <div class="kpi-card kpi-success">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-body">
+          <span class="kpi-label">Confirmadas</span>
+          <span class="kpi-value">{{ kpiConfirmadas() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SERVICE BREAKDOWN ───────────────────────────────────────────────── -->
+    <div class="section-card" *ngIf="kpiServiceBreakdown().length > 0">
+      <h2 class="section-title">Desglose por Servicio</h2>
+      <div class="breakdown-list">
+        <div class="breakdown-item" *ngFor="let s of kpiServiceBreakdown()">
+          <div class="breakdown-bar-wrap">
+            <span class="breakdown-name">{{ s.nombre }}</span>
+            <div class="breakdown-bar">
+              <div class="breakdown-fill" [style.width.%]="(s.count / kpiServicios()) * 100"></div>
+            </div>
+          </div>
+          <span class="breakdown-count">{{ s.count }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── APPOINTMENTS TABLE ──────────────────────────────────────────────── -->
+    <div class="section-card">
+      <h2 class="section-title">Agenda del Día</h2>
+
+      <div class="empty-state" *ngIf="filteredAppointments().length === 0">
+        <span class="empty-icon">🗓️</span>
+        <p>No hay citas para esta fecha{{ selectedBarberId() !== 'all' ? ' con este barbero' : '' }}.</p>
+      </div>
+
+      <div class="table-wrapper" *ngIf="filteredAppointments().length > 0">
+        <table class="appointments-table">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Cliente</th>
+              <th>Servicio</th>
+              <th>Barbero</th>
+              <th>Estado</th>
+              <th>Monto</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let appt of filteredAppointments()" [class.row-cancelled]="appt.estado === 'cancelada'" [class.row-completed]="appt.estado === 'completada'">
+              <td>
+                <span class="time-chip">{{ appt.hora }}</span>
+              </td>
+              <td>
+                <div class="client-info">
+                  <span class="client-name">{{ appt.clientes?.nombre || 'N/A' }}</span>
+                  <span class="client-phone">{{ appt.clientes?.telefono || '' }}</span>
+                </div>
+              </td>
+              <td>{{ appt.services?.nombre || 'N/A' }}</td>
+              <td>{{ appt.barbers?.nombre || 'N/A' }}</td>
+              <td>
+                <span class="status-chip" [ngClass]="getStatusClass(appt.estado)">
+                  {{ getStatusLabel(appt.estado) }}
+                </span>
+              </td>
+              <td class="price-cell">${{ appt.precio | number:'1.0-0' }}</td>
+              <td>
+                <div class="action-btns" *ngIf="updatingId() !== appt.id">
+                  <button
+                    *ngIf="appt.estado === 'pendiente'"
+                    class="action-btn confirm-btn"
+                    (click)="updateStatus(appt, 'confirmada')"
+                    title="Confirmar"
+                  >✓</button>
+                  <button
+                    *ngIf="appt.estado === 'confirmada'"
+                    class="action-btn complete-btn"
+                    (click)="updateStatus(appt, 'completada')"
+                    title="Completar"
+                  >✓✓</button>
+                  <button
+                    *ngIf="appt.estado !== 'cancelada' && appt.estado !== 'completada'"
+                    class="action-btn cancel-btn"
+                    (click)="updateStatus(appt, 'cancelada')"
+                    title="Cancelar"
+                  >✕</button>
+                </div>
+                <div *ngIf="updatingId() === appt.id" class="row-spinner"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+</div>

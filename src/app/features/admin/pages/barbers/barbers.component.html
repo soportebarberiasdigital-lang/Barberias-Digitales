@@ -1,0 +1,161 @@
+<div class="page-wrapper">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><span class="title-icon">✂️</span> Gestión de Barberos</h1>
+      <p class="page-subtitle">Administra el equipo de trabajo</p>
+    </div>
+    <button class="btn-add" (click)="openCreateModal()">
+      <span>＋</span> Nuevo Barbero
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="loading-state">
+    <div class="spinner"></div>
+    <span>Cargando barberos...</span>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading() && barbers().length === 0" class="empty-state">
+    <span class="empty-icon">💈</span>
+    <p>No hay barberos registrados aún.</p>
+    <button class="btn-add" (click)="openCreateModal()">Agregar el primero</button>
+  </div>
+
+  <!-- Grid -->
+  <div class="barbers-grid" *ngIf="!loading() && barbers().length > 0">
+    <div class="barber-card" *ngFor="let barber of barbers()">
+      <!-- Avatar -->
+      <div class="avatar-wrap">
+        <img *ngIf="barber.foto_url" [src]="barber.foto_url" [alt]="barber.nombre" class="avatar-img" />
+        <div *ngIf="!barber.foto_url" class="avatar-initials">{{ getInitials(barber.nombre) }}</div>
+        <span class="status-dot" [class.active]="barber.activo" [class.inactive]="!barber.activo"></span>
+      </div>
+
+      <!-- Info -->
+      <div class="barber-info">
+        <h3 class="barber-name">{{ barber.nombre }}</h3>
+        <p class="barber-phone">{{ barber.telefono || 'Sin teléfono' }}</p>
+        <span class="status-badge-pill" [class.active]="barber.activo">
+          {{ barber.activo ? 'Activo' : 'Inactivo' }}
+        </span>
+      </div>
+
+      <!-- Social Links -->
+      <div class="social-links">
+        <button
+          *ngIf="barber.redes_sociales?.instagram"
+          class="social-btn instagram"
+          (click)="openSocialLink(barber.redes_sociales?.instagram)"
+          title="Instagram"
+        >IG</button>
+        <button
+          *ngIf="barber.redes_sociales?.facebook"
+          class="social-btn facebook"
+          (click)="openSocialLink(barber.redes_sociales?.facebook)"
+          title="Facebook"
+        >FB</button>
+        <button
+          *ngIf="barber.redes_sociales?.tiktok"
+          class="social-btn tiktok"
+          (click)="openSocialLink(barber.redes_sociales?.tiktok)"
+          title="TikTok"
+        >TK</button>
+        <button
+          *ngIf="barber.redes_sociales?.whatsapp"
+          class="social-btn whatsapp"
+          (click)="openSocialLink('https://wa.me/' + barber.redes_sociales?.whatsapp)"
+          title="WhatsApp"
+        >WA</button>
+      </div>
+
+      <!-- Actions -->
+      <div class="card-actions">
+        <button class="action-btn edit-btn" (click)="openEditModal(barber)">✏️ Editar</button>
+        <button class="action-btn delete-btn" (click)="confirmDelete(barber)">🗑️</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL ──────────────────────────────────────────────────────────────── -->
+<div class="modal-overlay" *ngIf="showModal()" (click)="closeModal()"></div>
+<div class="modal" *ngIf="showModal()">
+  <div class="modal-header">
+    <h2>{{ editingBarber() ? 'Editar Barbero' : 'Nuevo Barbero' }}</h2>
+    <button class="modal-close" (click)="closeModal()">✕</button>
+  </div>
+
+  <div class="modal-body">
+    <form [formGroup]="form" (ngSubmit)="saveBarber()">
+
+      <!-- Photo Upload -->
+      <div class="photo-section">
+        <div class="photo-preview">
+          <img *ngIf="photoPreview()" [src]="photoPreview()!" alt="Preview" class="photo-img" />
+          <div *ngIf="!photoPreview()" class="photo-placeholder">📷</div>
+        </div>
+        <div class="photo-actions">
+          <label class="btn-upload" for="photoInput">Subir Foto</label>
+          <input id="photoInput" type="file" accept="image/*" (change)="onFileSelected($event)" hidden />
+          <span class="photo-hint">JPG, PNG, WebP. Máx 5MB</span>
+        </div>
+      </div>
+
+      <div class="form-divider">Información Personal</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nombre completo *</label>
+          <input class="form-input" formControlName="nombre" placeholder="Ej: Carlos Ramírez" [class.error]="isInvalid('nombre')" />
+          <span class="error-msg" *ngIf="isInvalid('nombre')">El nombre es requerido</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Teléfono</label>
+          <input class="form-input" formControlName="telefono" placeholder="+57 300 000 0000" />
+        </div>
+      </div>
+
+      <div class="form-group toggle-group">
+        <label class="form-label">Estado</label>
+        <label class="toggle">
+          <input type="checkbox" formControlName="activo" />
+          <span class="toggle-track"></span>
+          <span class="toggle-label">{{ form.get('activo')?.value ? 'Activo' : 'Inactivo' }}</span>
+        </label>
+      </div>
+
+      <div class="form-divider">Redes Sociales</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label social-label ig">Instagram</label>
+          <input class="form-input" formControlName="instagram" placeholder="usuario o URL" />
+        </div>
+        <div class="form-group">
+          <label class="form-label social-label fb">Facebook</label>
+          <input class="form-input" formControlName="facebook" placeholder="usuario o URL" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label social-label tk">TikTok</label>
+          <input class="form-input" formControlName="tiktok" placeholder="@usuario o URL" />
+        </div>
+        <div class="form-group">
+          <label class="form-label social-label wa">WhatsApp</label>
+          <input class="form-input" formControlName="whatsapp" placeholder="573001234567" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+        <button type="submit" class="btn-save" [disabled]="saving()">
+          <span *ngIf="!saving()">{{ editingBarber() ? '💾 Guardar Cambios' : '➕ Crear Barbero' }}</span>
+          <span *ngIf="saving()">Guardando...</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,67 @@
+<!-- Overlay for mobile -->
+<div class="sidebar-overlay" [class.active]="sidebarOpen()" (click)="closeSidebar()"></div>
+
+<div class="admin-shell">
+  <!-- ── SIDEBAR ─────────────────────────────────────────────────────── -->
+  <aside class="sidebar" [class.open]="sidebarOpen()">
+    <!-- Brand -->
+    <div class="sidebar-brand">
+      <div class="brand-icon">✂</div>
+      <div class="brand-text">
+        <span class="brand-name">BarberAdmin</span>
+        <span class="brand-sub">Panel de Control</span>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <a
+        *ngFor="let item of navItems"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeSidebar()"
+      >
+        <span class="material-icons nav-icon">{{ item.icon }}</span>
+        <span class="nav-label">{{ item.label }}</span>
+        <span class="nav-indicator"></span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <div class="admin-info">
+        <div class="admin-avatar">{{ adminName[0] }}</div>
+        <div class="admin-details">
+          <span class="admin-name">{{ adminName }}</span>
+          <span class="admin-role">Administrador</span>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()">
+        <span class="material-icons">logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN AREA ───────────────────────────────────────────────────── -->
+  <div class="main-area">
+    <!-- Top Header (mobile) -->
+    <header class="top-header">
+      <button class="menu-toggle" (click)="toggleSidebar()">
+        <span class="material-icons">menu</span>
+      </button>
+      <div class="header-brand">
+        <span class="material-icons" style="color: var(--primary-color)">content_cut</span>
+        <span>BarberAdmin</span>
+      </div>
+      <button class="header-logout" (click)="logout()">
+        <span class="material-icons">logout</span>
+      </button>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

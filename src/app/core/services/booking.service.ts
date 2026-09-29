@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
-import { Observable, from, map } from 'rxjs';
+import { Observable, defer, map } from 'rxjs';
 
 // --- Types matching User Schema ---
 export interface Barber {
@@ -73,13 +73,17 @@ export class BookingService {
 
     // --- Barbers ---
     getActiveBarbers(): Observable<Barber[]> {
-        const promise = this.supabaseService.client
-            .from('barbers')
-            .select('*')
-            .eq('activo', true);
-
-        return from(promise).pipe(
+        return defer(async () => {
+            const sessionRes = await this.supabaseService.client.auth.getSession();
+            console.log('[BookingService] getActiveBarbers - session uid:', sessionRes.data?.session?.user?.id ?? 'NO SESSION');
+            return this.supabaseService.client
+                .from('barbers')
+                .select('*')
+                .eq('activo', true)
+                .order('nombre', { ascending: true });
+        }).pipe(
             map(res => {
+                console.log('[BookingService] barbers raw response → error:', res.error, '| count:', res.data?.length);
                 if (res.error) {
                     console.error('Error fetching barbers from Supabase:', res.error);
                 }
@@ -90,13 +94,17 @@ export class BookingService {
 
     // --- Services ---
     getActiveServices(): Observable<Service[]> {
-        const promise = this.supabaseService.client
-            .from('services')
-            .select('*')
-            .eq('activo', true);
-
-        return from(promise).pipe(
+        return defer(async () => {
+            const sessionRes = await this.supabaseService.client.auth.getSession();
+            console.log('[BookingService] getActiveServices - session uid:', sessionRes.data?.session?.user?.id ?? 'NO SESSION');
+            return this.supabaseService.client
+                .from('services')
+                .select('*')
+                .eq('activo', true)
+                .order('precio', { ascending: true });
+        }).pipe(
             map(res => {
+                console.log('[BookingService] services raw response → error:', res.error, '| count:', res.data?.length);
                 if (res.error) {
                     console.error('Error fetching services from Supabase:', res.error);
                 }
@@ -107,14 +115,15 @@ export class BookingService {
 
     // --- Barber Schedules ---
     getBarberSchedule(barberId: string, diaSemana: number): Observable<BarberSchedule | null> {
-        const promise = this.supabaseService.client
-            .from('barber_schedules')
-            .select('*')
-            .eq('barber_id', barberId)
-            .eq('dia_semana', diaSemana)
-            .maybeSingle();
-
-        return from(promise).pipe(
+        return defer(async () => {
+            await this.supabaseService.client.auth.getSession();
+            return this.supabaseService.client
+                .from('barber_schedules')
+                .select('*')
+                .eq('barber_id', barberId)
+                .eq('dia_semana', diaSemana)
+                .maybeSingle();
+        }).pipe(
             map(res => {
                 if (res.error) {
                     console.error('Error fetching barber schedule:', res.error);
@@ -126,13 +135,14 @@ export class BookingService {
 
     // --- Blocked Times ---
     getBlockedTimes(barberId: string, fecha: string): Observable<BlockedTime[]> {
-        const promise = this.supabaseService.client
-            .from('blocked_times')
-            .select('*')
-            .eq('barber_id', barberId)
-            .eq('fecha', fecha);
-
-        return from(promise).pipe(
+        return defer(async () => {
+            await this.supabaseService.client.auth.getSession();
+            return this.supabaseService.client
+                .from('blocked_times')
+                .select('*')
+                .eq('barber_id', barberId)
+                .eq('fecha', fecha);
+        }).pipe(
             map(res => {
                 if (res.error) {
                     console.error('Error fetching blocked times:', res.error);
@@ -144,13 +154,14 @@ export class BookingService {
 
     // --- Barberia Config ---
     getBarberiaConfig(): Observable<BarberiaConfig | null> {
-        const promise = this.supabaseService.client
-            .from('barberia_config')
-            .select('*')
-            .limit(1)
-            .maybeSingle();
-
-        return from(promise).pipe(
+        return defer(async () => {
+            await this.supabaseService.client.auth.getSession();
+            return this.supabaseService.client
+                .from('barberia_config')
+                .select('*')
+                .limit(1)
+                .maybeSingle();
+        }).pipe(
             map(res => {
                 if (res.error) {
                     console.error('Error fetching barberia config:', res.error);
@@ -162,14 +173,15 @@ export class BookingService {
 
     // --- Appointments ---
     getAppointmentsForBarber(barberId: string, date: string): Observable<Appointment[]> {
-        const promise = this.supabaseService.client
-            .from('appointments')
-            .select('*')
-            .eq('barber_id', barberId)
-            .eq('fecha', date)
-            .neq('estado', 'cancelada');
-
-        return from(promise).pipe(
+        return defer(async () => {
+            await this.supabaseService.client.auth.getSession();
+            return this.supabaseService.client
+                .from('appointments')
+                .select('*')
+                .eq('barber_id', barberId)
+                .eq('fecha', date)
+                .neq('estado', 'cancelada');
+        }).pipe(
             map(res => {
                 if (res.error) {
                     console.error('Error fetching appointments for barber:', res.error);
@@ -180,18 +192,19 @@ export class BookingService {
     }
 
     getUserAppointments(clientId: string): Observable<Appointment[]> {
-        const promise = this.supabaseService.client
-            .from('appointments')
-            .select(`
-        *,
-        services (nombre, precio, duracion_min),
-        barbers (nombre)
-      `)
-            .eq('cliente_id', clientId)
-            .order('fecha', { ascending: false })
-            .order('hora', { ascending: false });
-
-        return from(promise).pipe(
+        return defer(async () => {
+            await this.supabaseService.client.auth.getSession();
+            return this.supabaseService.client
+                .from('appointments')
+                .select(`
+                    *,
+                    services (nombre, precio, duracion_min),
+                    barbers (nombre)
+                `)
+                .eq('cliente_id', clientId)
+                .order('fecha', { ascending: false })
+                .order('hora', { ascending: false });
+        }).pipe(
             map(res => {
                 if (res.error) {
                     console.error('Error fetching user appointments:', res.error);
@@ -202,20 +215,22 @@ export class BookingService {
     }
 
     createAppointment(appointment: Appointment): Observable<any> {
-        const promise = this.supabaseService.client
-            .from('appointments')
-            .insert(appointment);
-
-        return from(promise);
+        return defer(async () => {
+            await this.supabaseService.client.auth.getSession();
+            return this.supabaseService.client
+                .from('appointments')
+                .insert(appointment);
+        });
     }
 
     cancelAppointment(appointmentId: string): Observable<any> {
-        const promise = this.supabaseService.client
-            .from('appointments')
-            .update({ estado: 'cancelada' })
-            .eq('id', appointmentId);
-
-        return from(promise);
+        return defer(async () => {
+            await this.supabaseService.client.auth.getSession();
+            return this.supabaseService.client
+                .from('appointments')
+                .update({ estado: 'cancelada' })
+                .eq('id', appointmentId);
+        });
     }
 
     getAllTodayAppointments(): Observable<Appointment[]> {
@@ -224,43 +239,46 @@ export class BookingService {
     }
 
     getAllAppointmentsByDate(fecha: string): Observable<Appointment[]> {
-        const promise = this.supabaseService.client
-            .from('appointments')
-            .select(`
-        *,
-        services (nombre, precio, duracion_min),
-        barbers (nombre),
-        clientes (nombre, telefono)
-      `)
-            .eq('fecha', fecha)
-            .order('hora', { ascending: true });
-
-        return from(promise).pipe(map(res => res.data as Appointment[] || []));
+        return defer(async () => {
+            await this.supabaseService.client.auth.getSession();
+            return this.supabaseService.client
+                .from('appointments')
+                .select(`
+                    *,
+                    services (nombre, precio, duracion_min),
+                    barbers (nombre),
+                    clientes (nombre, telefono)
+                `)
+                .eq('fecha', fecha)
+                .order('hora', { ascending: true });
+        }).pipe(map(res => (res.data as Appointment[]) || []));
     }
 
     getAppointmentsByDateRange(fechaInicio: string, fechaFin: string): Observable<Appointment[]> {
-        const promise = this.supabaseService.client
-            .from('appointments')
-            .select(`
-        *,
-        services (nombre, precio, duracion_min),
-        barbers (nombre),
-        clientes (nombre, telefono)
-      `)
-            .gte('fecha', fechaInicio)
-            .lte('fecha', fechaFin)
-            .order('fecha', { ascending: false })
-            .order('hora', { ascending: false });
-
-        return from(promise).pipe(map(res => res.data as Appointment[] || []));
+        return defer(async () => {
+            await this.supabaseService.client.auth.getSession();
+            return this.supabaseService.client
+                .from('appointments')
+                .select(`
+                    *,
+                    services (nombre, precio, duracion_min),
+                    barbers (nombre),
+                    clientes (nombre, telefono)
+                `)
+                .gte('fecha', fechaInicio)
+                .lte('fecha', fechaFin)
+                .order('fecha', { ascending: false })
+                .order('hora', { ascending: false });
+        }).pipe(map(res => (res.data as Appointment[]) || []));
     }
 
     updateAppointmentStatus(appointmentId: string, estado: 'pendiente' | 'confirmada' | 'cancelada' | 'completada'): Observable<any> {
-        const promise = this.supabaseService.client
-            .from('appointments')
-            .update({ estado })
-            .eq('id', appointmentId);
-
-        return from(promise);
+        return defer(async () => {
+            await this.supabaseService.client.auth.getSession();
+            return this.supabaseService.client
+                .from('appointments')
+                .update({ estado })
+                .eq('id', appointmentId);
+        });
     }
 }

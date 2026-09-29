@@ -3,7 +3,7 @@ import { SupabaseService } from '../../../core/services/supabase.service';
 import { AdminBarber } from '../models/barber.model';
 import { ShopProfile } from '../models/shop.model';
 import { AdminAppointment } from '../models/appointment.model';
-import { Observable, from, map } from 'rxjs';
+import { Observable, defer, map } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AdminSupabaseService {
@@ -13,30 +13,34 @@ export class AdminSupabaseService {
   // ─── BARBERS ────────────────────────────────────────────────────────────────
 
   getAllBarbers(): Observable<AdminBarber[]> {
-    return from(
-      this.supabase.client
+    return defer(async () => {
+      await this.supabase.client.auth.getSession();
+      return this.supabase.client
         .from('barbers')
         .select('*')
-        .order('nombre', { ascending: true })
-    ).pipe(map(res => (res.data as AdminBarber[]) || []));
+        .order('nombre', { ascending: true });
+    }).pipe(map(res => (res.data as AdminBarber[]) || []));
   }
 
   createBarber(barber: AdminBarber): Observable<any> {
-    return from(
-      this.supabase.client.from('barbers').insert(barber).select().single()
-    );
+    return defer(async () => {
+      await this.supabase.client.auth.getSession();
+      return this.supabase.client.from('barbers').insert(barber).select().single();
+    });
   }
 
   updateBarber(id: string, barber: Partial<AdminBarber>): Observable<any> {
-    return from(
-      this.supabase.client.from('barbers').update(barber).eq('id', id)
-    );
+    return defer(async () => {
+      await this.supabase.client.auth.getSession();
+      return this.supabase.client.from('barbers').update(barber).eq('id', id);
+    });
   }
 
   deleteBarber(id: string): Observable<any> {
-    return from(
-      this.supabase.client.from('barbers').delete().eq('id', id)
-    );
+    return defer(async () => {
+      await this.supabase.client.auth.getSession();
+      return this.supabase.client.from('barbers').delete().eq('id', id);
+    });
   }
 
   async uploadBarberPhoto(barberId: string, file: File): Promise<string | null> {
@@ -55,19 +59,21 @@ export class AdminSupabaseService {
   // ─── SHOP PROFILE ────────────────────────────────────────────────────────────
 
   getShopProfile(): Observable<ShopProfile | null> {
-    return from(
-      this.supabase.client
+    return defer(async () => {
+      await this.supabase.client.auth.getSession();
+      return this.supabase.client
         .from('barberia_config')
         .select('*')
         .limit(1)
-        .single()
-    ).pipe(map(res => (res.data as ShopProfile) || null));
+        .single();
+    }).pipe(map(res => (res.data as ShopProfile) || null));
   }
 
   updateShopProfile(id: string, profile: Partial<ShopProfile>): Observable<any> {
-    return from(
-      this.supabase.client.from('barberia_config').update(profile).eq('id', id)
-    );
+    return defer(async () => {
+      await this.supabase.client.auth.getSession();
+      return this.supabase.client.from('barberia_config').update(profile).eq('id', id);
+    });
   }
 
   async uploadShopLogo(file: File): Promise<string | null> {
@@ -86,37 +92,42 @@ export class AdminSupabaseService {
   // ─── APPOINTMENTS ────────────────────────────────────────────────────────────
 
   getAppointmentsByDate(fecha: string, barberId?: string): Observable<AdminAppointment[]> {
-    let query = this.supabase.client
-      .from('appointments')
-      .select('*, services(nombre, precio, duracion_min), barbers(nombre), clientes(nombre, telefono)')
-      .eq('fecha', fecha)
-      .order('hora', { ascending: true });
-    if (barberId) query = query.eq('barber_id', barberId);
-    return from(query).pipe(map(res => (res.data as AdminAppointment[]) || []));
+    return defer(async () => {
+      await this.supabase.client.auth.getSession();
+      let query = this.supabase.client
+        .from('appointments')
+        .select('*, services(nombre, precio, duracion_min), barbers(nombre), clientes(nombre, telefono)')
+        .eq('fecha', fecha)
+        .order('hora', { ascending: true });
+      if (barberId) query = query.eq('barber_id', barberId);
+      return query;
+    }).pipe(map(res => (res.data as AdminAppointment[]) || []));
   }
 
   updateAppointmentStatus(
     id: string,
     estado: 'pendiente' | 'confirmada' | 'cancelada' | 'completada'
   ): Observable<any> {
-    return from(
-      this.supabase.client.from('appointments').update({ estado }).eq('id', id)
-    );
+    return defer(async () => {
+      await this.supabase.client.auth.getSession();
+      return this.supabase.client.from('appointments').update({ estado }).eq('id', id);
+    });
   }
 
   getAppointmentsByMonth(year: number, month: number): Observable<AdminAppointment[]> {
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    const start = `${year}-${pad(month)}-01`;
-    const lastDay = new Date(year, month, 0).getDate();
-    const end = `${year}-${pad(month)}-${pad(lastDay)}`;
-    return from(
-      this.supabase.client
+    return defer(async () => {
+      await this.supabase.client.auth.getSession();
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const start = `${year}-${pad(month)}-01`;
+      const lastDay = new Date(year, month, 0).getDate();
+      const end = `${year}-${pad(month)}-${pad(lastDay)}`;
+      return this.supabase.client
         .from('appointments')
         .select('*, services(nombre, precio, duracion_min), barbers(nombre), clientes(nombre, telefono)')
         .gte('fecha', start)
         .lte('fecha', end)
         .order('fecha', { ascending: true })
-        .order('hora', { ascending: true })
-    ).pipe(map(res => (res.data as AdminAppointment[]) || []));
+        .order('hora', { ascending: true });
+    }).pipe(map(res => (res.data as AdminAppointment[]) || []));
   }
 }

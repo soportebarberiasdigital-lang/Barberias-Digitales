@@ -80,14 +80,24 @@ export class BookingComponent implements OnInit {
     private toastService: ToastService
   ) { }
 
-  ngOnInit(): void {
-    this.authService.currentUser$.subscribe(user => {
-      this.userInfo = user;
-    });
-
-    this.loadServicesAndBarbers();
+  async ngOnInit(): Promise<void> {
     this.initQuickDates();
     this.generateCalendarDays();
+
+    // 1. Asegurar sesión de Supabase lista tras un refresco de página
+    const user = await this.authService.ensureUserLoaded();
+    if (user) {
+      this.userInfo = user;
+    }
+
+    this.authService.currentUser$.subscribe(u => {
+      if (u) {
+        this.userInfo = u;
+      }
+    });
+
+    // 2. Cargar servicios y barberos
+    this.loadServicesAndBarbers();
   }
 
   loadServicesAndBarbers() {
@@ -96,38 +106,42 @@ export class BookingComponent implements OnInit {
 
     this.bookingService.getActiveServices().subscribe({
       next: (services) => {
-        this.services = services;
+        this.services = services || [];
         this.loadingServices = false;
-
-        // Check query params
-        this.route.queryParams.subscribe(params => {
-          const serviceId = params['serviceId'];
-          const precio = params['precio'];
-          if (serviceId) {
-            this.selectedServiceId = serviceId;
-            this.selectedServicePrecio = precio ? Number(precio) : 0;
-            const match = this.services.find(s => s.id === serviceId);
-            if (match) {
-              this.selectedService = match;
-              this.selectedServicePrecio = match.precio;
-            }
-            // Move directly to barber selection if service was provided
-            this.step = 2;
-          }
-        });
+        this.applyQueryParams();
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error cargando servicios en reserva:', err);
         this.loadingServices = false;
       }
     });
 
     this.bookingService.getActiveBarbers().subscribe({
       next: (barbers) => {
-        this.barbers = barbers;
+        this.barbers = barbers || [];
         this.loadingBarbers = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error cargando barberos en reserva:', err);
         this.loadingBarbers = false;
+      }
+    });
+  }
+
+  private applyQueryParams() {
+    this.route.queryParams.subscribe(params => {
+      const serviceId = params['serviceId'];
+      const precio = params['precio'];
+      if (serviceId && this.services.length > 0) {
+        this.selectedServiceId = serviceId;
+        this.selectedServicePrecio = precio ? Number(precio) : 0;
+        const match = this.services.find(s => s.id === serviceId);
+        if (match) {
+          this.selectedService = match;
+          this.selectedServicePrecio = match.precio;
+        }
+        // Move directly to barber selection if service was provided
+        this.step = 2;
       }
     });
   }

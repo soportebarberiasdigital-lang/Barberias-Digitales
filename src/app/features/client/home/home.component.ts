@@ -34,13 +34,23 @@ export class HomeComponent implements OnInit {
     private toastService: ToastService
   ) { }
 
-  ngOnInit(): void {
-    this.authService.currentUser$.subscribe(user => {
+  async ngOnInit(): Promise<void> {
+    const user = await this.authService.ensureUserLoaded();
+    if (user && (user.role === 'cliente' || user.role === 'client')) {
       this.currentUser = user;
-      if (user && (user.role === 'cliente' || user.role === 'client')) {
-        this.loadDashboardData(user.id);
-      } else {
-        this.loadServicesOnly();
+      this.loadDashboardData(user.id);
+    } else {
+      this.loadServicesOnly();
+    }
+
+    this.authService.currentUser$.subscribe(u => {
+      if (u && (!this.currentUser || this.currentUser.id !== u.id)) {
+        this.currentUser = u;
+        if (u.role === 'cliente' || u.role === 'client') {
+          this.loadDashboardData(u.id);
+        } else {
+          this.loadServicesOnly();
+        }
       }
     });
   }
